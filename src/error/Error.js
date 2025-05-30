@@ -1,7 +1,15 @@
 class UserError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
 
-    constructor(message, statusCode) {
-        super(message);
-        this.statusCode = statusCode;
-    };
-};
+class StockError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
+
+export default { UserError, StockError };
