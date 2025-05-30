@@ -9,12 +9,13 @@
   "license": "ISC",
   "description": "",
   "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prisma": "^6.8.2"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "mysql2": "^3.14.1",
-    "nodemon": "^3.1.10",
-    "prisma": "^6.8.2"
+    "express": "^5.1.0"
   }
 }
