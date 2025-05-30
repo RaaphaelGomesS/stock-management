@@ -1,15 +1,16 @@
-import fastify from "fastify";
+import express from "express";
 import cors from "cors";
-import router from "./router/router.js";
+import UserRouter from "./router/UserRouter.js";
 import "dotenv/config";
 
-const app = fastify();
+const app = express();
 
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use("/", router);
+//Configuração das rotas
+app.use("/", UserRouter);
 
 //Middleware para disparar os erros
 app.use((err, req, res, next) => {
