@@ -65,6 +65,8 @@ model ProductTemplate {
   loteAmount  Int       @map("lote_amount")
   image       String?
   products    Product[]
+
+  @@map("product_template")
 }
 
 model Product {

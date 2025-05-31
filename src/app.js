@@ -15,7 +15,7 @@ app.use("/", UserRouter);
 //Middleware para disparar os erros
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
-  res.status(status).json({ error: err.message });
+  res.status(status).json({ [err.name] : err.message });
 });
 
 app.listen(process.env.PORT, () => {
