@@ -1,3 +1,4 @@
+
 class StockService {
   async createStock(reqBody) {
     return {};
