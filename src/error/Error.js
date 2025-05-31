@@ -5,3 +5,5 @@ class UserError extends Error {
         this.statusCode = statusCode;
     };
 };
+
+export default {UserError};
