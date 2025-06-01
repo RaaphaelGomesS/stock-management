@@ -3,7 +3,7 @@ import UserService from "../service/UserService.js";
 class UserController {
   async registerUser(req, res, next) {
     try {
-      const {name, email, password} = req.body;
+      const { name, email, password } = req.body;
       const user = await UserService.createUser(name, email, password);
       res.status(201).json(user);
     } catch (error) {
@@ -29,7 +29,8 @@ class UserController {
 
   async login(req, res, next) {
     try {
-      const token = 
+      const { email, password } = req.body;
+      const token = await UserService.login(email, password);
       res.status(200).json(token);
     } catch (error) {
       next(error);
