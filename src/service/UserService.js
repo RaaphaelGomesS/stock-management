@@ -23,6 +23,35 @@ class UserService {
     return user;
   }
 
+  async updateUser(id, name, email, password) {
+    await this.findById(id);
+
+    Validation.validatePasswordAndEmail(email, password);
+
+    await this.verifyUserAlreadyExist(email);
+
+    const encryptPass = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        name: name,
+        email: email,
+        password: encryptPass,
+      },
+    });
+
+    return user;
+  }
+
+  async deleteUser(id) {
+    await this.findById(id);
+
+    await prisma.user.delete({
+      where: { id },
+    });
+  }
+
   async login(email, password) {
     const user = await this.findByEmail(email);
     const isValidatedPassword = await bcrypt.compare(password, user.password);
@@ -33,7 +62,7 @@ class UserService {
 
     return jwt.sign(
       {
-        user_id: user.id,
+        userId: user.id,
         email: user.email,
       },
       process.env.JWT_SECRET,
