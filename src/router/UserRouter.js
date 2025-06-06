@@ -1,6 +1,7 @@
 import express from "express";
 import UserController from "../controller/UserController.js";
 import AuthService from "../service/AuthService.js";
+import ProductsController from "../controller/ProductsController.js";
 
 const router = express.Router();
 
@@ -10,5 +11,9 @@ router.post("/register", UserController.registerUser);
 router.get("/user", AuthService.authentication, UserController.getUser);
 router.put("/user/:id", AuthService.authentication, UserController.updateUser);
 router.delete("/user/:id", AuthService.authentication, UserController.deleteUser);
+
+router.post("/CreateProducts", AuthService.authentication, ProductsController.CreateProducts);
+router.get("/findproduct", AuthService.authentication, ProductsController.findProduct);
+router.delete("/deleteproduct", AuthService.authentication, ProductsController.findProduct);
 
 export default router;

@@ -10,10 +10,10 @@ class ProductsContoll {
         }
 
     }
-    async findProductsName(req, res, next) {
+    async findProduct(req, res, next) {
         try {
-            const products = await ProductsService.findProductsName(req);
-            res.status(201).json(products)
+            const product = await ProductsService.findProductID(req);
+            res.status(201).json(product)
         } catch (error) {
             next(error);
         }
@@ -26,9 +26,9 @@ class ProductsContoll {
             next(error);
         }
     }
-    async deleteProducts(req, res, next) {
+    async deleteProduct(req, res, next) {
         try {
-            const products = await ProductsService.deleteProducts(req);
+            const products = await ProductsService.deleteProduct(req);
             res.status(201).json(products)
         } catch (error) {
             next(error);
