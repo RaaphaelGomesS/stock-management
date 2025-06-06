@@ -17,9 +17,9 @@ app.use("/stock", StockRouter);
 //Middleware para disparar os erros
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
-  res.status(status).json({ error: err.message });
+  res.status(status).json({ [err.name]: err.message });
 });
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log("aplicação rodando!");
 });
