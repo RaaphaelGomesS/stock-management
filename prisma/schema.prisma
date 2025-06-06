@@ -7,21 +7,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
-  name     String?
-  stocks   Stock[]
+model ProductTemplate {
+  ean         Int       @id @default(autoincrement())
+  name        String
+  description String?
+  type        Type      @default(GENERAL)
+  loteType    LoteType  @default(UNIT) @map("lote_type")
+  weight      Decimal?  @db.Decimal(5, 2)
+  loteAmount  Int       @map("lote_amount")
+  image       String?
+  product     product[]
+
+  @@map("product_template")
 }
 
-model Stock {
+model product {
+  id               Int               @id @default(autoincrement())
+  shelf_id         Int
+  template_id      Int
+  name             String
+  description      String?
+  type             product_type      @default(GENERAL)
+  lote_type        product_lote_type @default(UNIT)
+  weight           Decimal?          @db.Decimal(5, 2)
+  lote_amount      Int
+  quantity         Int
+  validity         String?
+  column           Int?
+  row              Int
+  created_date     DateTime          @default(now())
+  updated_date     DateTime
+  image            String?
+  user_id          Int
+  shelf            shelf             @relation(fields: [shelf_id], references: [id], map: "Product_shelf_id_fkey")
+  product_template ProductTemplate   @relation(fields: [template_id], references: [ean], map: "Product_template_id_fkey")
+
+  @@index([shelf_id], map: "Product_shelf_id_fkey")
+  @@index([template_id], map: "Product_template_id_fkey")
+}
+
+model shelf {
+  id           Int               @id @default(autoincrement())
+  stock_id     Int
+  columns      Int
+  rows         Int
+  destination  shelf_destination @default(GENERAL)
+  restriction  String?
+  full         Boolean           @default(false)
+  created_date DateTime          @default(now())
+  updated_date DateTime
+  user_id      Int
+  product      product[]
+  stock        stock             @relation(fields: [stock_id], references: [id], map: "Shelf_stock_id_fkey")
+
+  @@index([stock_id], map: "Shelf_stock_id_fkey")
+}
+
+model stock {
   id          Int     @id @default(autoincrement())
-  User        User    @relation(fields: [userId], references: [id])
-  userId      Int     @map("user_id")
+  user_id     Int
   name        String?
   description String?
-  shelfs      Shelf[]
+  shelf       shelf[]
+  user        user    @relation(fields: [user_id], references: [id], map: "Stock_user_id_fkey")
+
+  @@index([user_id], map: "Stock_user_id_fkey")
+}
+
+model user {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique(map: "User_email_key")
+  password String
+  name     String?
+  stock    stock[]
 }
 
 enum Type {
@@ -30,20 +88,6 @@ enum Type {
   PRESERVE
   PERISHABLE
   DRINKS
-}
-
-model Shelf {
-  id          Int       @id @default(autoincrement())
-  Stock       Stock     @relation(fields: [stockId], references: [id])
-  stockId     Int       @map("stock_id")
-  columns     Int
-  rows        Int
-  destination Type      @default(GENERAL)
-  restriction String?
-  full        Boolean   @default(false)
-  createdDate DateTime  @default(now()) @map("created_date")
-  updatedDate DateTime  @updatedAt @map("updated_date")
-  products    Product[]
 }
 
 enum LoteType {
@@ -55,37 +99,27 @@ enum LoteType {
   BURDEN
 }
 
-model ProductTemplate {
-  ean         Int       @id @default(autoincrement())
-  name        String
-  description String?
-  type        Type      @default(GENERAL)
-  loteType    LoteType  @default(UNIT) @map("lote_type")
-  weight      Decimal?  @db.Decimal(5, 2)
-  loteAmount  Int       @map("lote_amount")
-  image       String?
-  products    Product[]
-
-  @@map("product_template")
+enum shelf_destination {
+  GENERAL
+  CLEANING
+  PRESERVE
+  PERISHABLE
+  DRINKS
 }
 
-model Product {
-  id                Int             @id @default(autoincrement())
-  Shelf             Shelf           @relation(fields: [shelfId], references: [id])
-  shelfId           Int             @map("shelf_id")
-  ProductTemplate   ProductTemplate @relation(fields: [productTemplateId], references: [ean])
-  productTemplateId Int             @map("template_id")
-  name              String
-  description       String?
-  type              Type            @default(GENERAL)
-  loteType          LoteType        @default(UNIT) @map("lote_type")
-  weight            Decimal?        @db.Decimal(5, 2)
-  loteAmount        Int             @map("lote_amount")
-  quantity          Int
-  validity          String?
-  column            Int?
-  row               Int
-  createdDate       DateTime        @default(now()) @map("created_date")
-  updatedDate       DateTime        @updatedAt @map("updated_date")
-  image             String?
+enum product_type {
+  GENERAL
+  CLEANING
+  PRESERVE
+  PERISHABLE
+  DRINKS
+}
+
+enum product_lote_type {
+  UNIT
+  BOX
+  BUNDLE
+  PACK
+  PACKAGE
+  BURDEN
 }
