@@ -10,9 +10,9 @@ class ProductsContoll {
         }
 
     }
-    async searchProducts(req, res, next) {
+    async findProductsName(req, res, next) {
         try {
-            const products = await ProductsService.searchProducts(req);
+            const products = await ProductsService.findProductsName(req);
             res.status(201).json(products)
         } catch (error) {
             next(error);
