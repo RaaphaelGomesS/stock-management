@@ -1,12 +1,15 @@
-import express from "express";
+import AuthService from "../service/AuthService.js";
 import StockController from "../controller/StockController.js";
+import express from "express";
 
 const router = express.Router();
 
-router.post("/create", StockController.createStock);
-router.get("/", StockController.getAllStocks);
-router.get("/:id", StockController.getStock);
-router.delete("/delete/:id", StockController.deleteStock);
-router.put("/update/:id", StockController.updateStock);
+
+
+router.post('/', StockController.createStock);
+router.get("/", AuthService.authentication, StockController.getAllStocks);
+router.get('/:id', StockController.getStockById);
+router.put('/:id', StockController.updateStock);
+router.delete('/:id', StockController.deleteStock);
 
 export default router;

@@ -3,7 +3,7 @@ import { UserError } from "../error/Error.js";
 class Validation {
   validatePasswordAndEmail(email, password) {
     if (!password || !email) {
-      throw new UserError("Email ou senha estão em branco!", 400);
+      throw new UserError("Email ou senha estão em branco!", 400);  
     }
 
     const emailPattern = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
