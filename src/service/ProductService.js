@@ -2,8 +2,8 @@ import prisma from "../../prisma/prismaClient.js";
 import { UserError } from "../error/Error.js";
 
 class ProductsService {
-    async CreateProduct(reqBody,) {
-        await this.findProductID(reqBody.id);
+    async Registerproduct(reqBody,) {
+
 
         const product = await Prisma.product.create({
 
@@ -28,7 +28,7 @@ class ProductsService {
 
         return product;
     }
-    async updatedProduto(reqBody, user) {
+    async updadeProduct(reqBody, user) {
 
         const product = await prisma.product.update({
             where: { id },

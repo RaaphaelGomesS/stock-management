@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import UserRouter from "./router/UserRouter.js";
+import ProductRouter from "./router/ProductRouter.js"
 import "dotenv/config";
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(express.json());
 
 //Configuração das rotas
 app.use("/", UserRouter);
+app.use("/product", ProductRouter);
 
 //Middleware para disparar os erros
 app.use((err, req, res, next) => {
