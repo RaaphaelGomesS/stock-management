@@ -1,10 +1,10 @@
-import ProductsService from "../service/ProductService";
+import ProductService from "../service/ProductService";
 
-class ProductsContoll {
+class ProductContoll {
     async Registerproduct(req, res, next) {
         try {
-            const products = await ProductsService.Registerproduct(req);
-            res.status(201).json(products)
+            const product = await ProductService.Registerproduct(req);
+            res.status(201).json(product)
         } catch (error) {
             next(error);
         }
@@ -12,7 +12,7 @@ class ProductsContoll {
     }
     async findProductID(req, res, next) {
         try {
-            const product = await ProductsService.findProductID(req);
+            const product = await ProductService.findProductID(req);
             res.status(201).json(product)
         } catch (error) {
             next(error);
@@ -20,16 +20,16 @@ class ProductsContoll {
     }
     async updadeProduct(req, res, next) {
         try {
-            const products = await ProductsService.updadeProduct(req);
-            res.status(201).json(products)
+            const product = await ProductService.updadeProduct(req);
+            res.status(201).json(product)
         } catch (error) {
             next(error);
         }
     }
     async deleteProduct(req, res, next) {
         try {
-            const products = await ProductsService.deleteProduct(req);
-            res.status(201).json(products)
+            const product = await ProductService.deleteProduct(req);
+            res.status(201).json(product)
         } catch (error) {
             next(error);
         }
@@ -38,4 +38,4 @@ class ProductsContoll {
 
 
 }
-export default new ProductsContoll();
+export default new ProductContoll();

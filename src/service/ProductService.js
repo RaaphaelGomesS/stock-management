@@ -1,9 +1,9 @@
 import prisma from "../../prisma/prismaClient.js";
 import { UserError } from "../error/Error.js";
 
-class ProductsService {
+class ProductService {
     async Registerproduct(reqBody,) {
-
+        await this.findProductID(reqBody.id);
 
         const product = await Prisma.product.create({
 
@@ -71,4 +71,4 @@ class ProductsService {
     }
 
 }
-export default new ProductsService();
+export default new ProductService();
