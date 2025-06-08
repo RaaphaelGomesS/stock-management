@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.post("/login", UserController.login);
 router.post("/register", UserController.registerUser);
-
 router.get("/user", AuthService.authentication, UserController.getUser);
 router.put("/user/:id", AuthService.authentication, UserController.updateUser);
 router.delete("/user/:id", AuthService.authentication, UserController.deleteUser);
