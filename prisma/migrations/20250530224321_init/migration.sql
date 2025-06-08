@@ -80,4 +80,4 @@ ALTER TABLE `Shelf` ADD CONSTRAINT `Shelf_stock_id_fkey` FOREIGN KEY (`stock_id`
 ALTER TABLE `Product` ADD CONSTRAINT `Product_shelf_id_fkey` FOREIGN KEY (`shelf_id`) REFERENCES `Shelf`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Product` ADD CONSTRAINT `Product_template_id_fkey` FOREIGN KEY (`template_id`) REFERENCES `ProductTemplate`(`ean`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Product` ADD CONSTRAINT `Product_template_id_fkey` FOREIGN KEY (`template_id`) REFERENCES `product_template`(`ean`) ON DELETE RESTRICT ON UPDATE CASCADE;
