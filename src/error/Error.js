@@ -10,6 +10,7 @@ export class UserError extends Error {
 export class StockError extends Error {
   constructor(message, statusCode) {
     super(message);
+    this.name = "StockError";
     this.statusCode = statusCode;
   }
 };

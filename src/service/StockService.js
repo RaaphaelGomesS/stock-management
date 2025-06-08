@@ -2,12 +2,14 @@ import prisma from "../../prisma/prismaClient.js";
 import { StockError } from "../error/Error.js";
 
 class StockService {
-  async createStock(data) {
+  async createStock(data, userId) {
+    await this.verifyAlreadyExist(data.name);
+
     const stock = await prisma.stock.create({
       data: {
         name: data.name,
         description: data.description,
-        user_id: Number(data.user_id),
+        user_id: userId,
       },
     });
     return stock;
@@ -16,40 +18,20 @@ class StockService {
   async getAllStocks(userId) {
     const stocks = await prisma.stock.findMany({
       where: { user_id: userId },
-      include: {
-        shelf: true,
-      },
     });
+
+    if (!stocks) {
+      throw new StockError("Nenhum estoque encontrado!", 404);
+    }
+
     return stocks;
   }
 
-  async getStockById({ id, userId }) {
-    const stock = await prisma.stock.findFirst({
-      where: {
-        id: Number(id),
-        user_id: userId,
-      },
-      include: {
-        shelf: true,
-      },
-    });
-    return stock;
-  }
-
   async updateStock({ id, userId, ...data }) {
-    const existing = await prisma.stock.findFirst({
-      where: {
-        id: Number(id),
-        user_id: userId,
-      },
-    });
-
-    if (!existing) {
-      throw new StockError("Estoque não encontrado ou não pertence ao usuário", 403);
-    }
+    await this.findById(id, userId);
 
     const updatedStock = await prisma.stock.update({
-      where: { id: Number(id) },
+      where: { id },
       data: {
         name: data.name,
         description: data.description,
@@ -59,22 +41,38 @@ class StockService {
     return updatedStock;
   }
 
-  async deleteStock({ id, userId }) {
-    const existing = await prisma.stock.findFirst({
-      where: {
-        id: Number(id),
-        user_id: userId,
-      },
+  async deleteStock(id) {
+    await this.getStockById(id, userId);
+
+    return await prisma.stock.delete({
+      where: { id },
+    });
+  }
+
+  async getStockById(id, userId) {
+    const stock = await prisma.stock.findFirst({
+      where: { id },
     });
 
-    if (!existing) {
-      throw new StockError("Estoque não encontrado ou não pertence ao usuário", 403);
+    if (!stock) {
+      throw new StockError("Estoque não encontrado!", 404);
     }
 
-    const deletedStock = await prisma.stock.delete({
-      where: { id: Number(id) },
+    if (stock.user_id != userId) {
+      throw new StockError("Não possui permissão para acessar o estoque!", 403);
+    }
+
+    return stock;
+  }
+
+  async verifyAlreadyExist(name) {
+    const stock = await prisma.stock.findFirst({
+      where: { name },
     });
-    return deletedStock;
+
+    if (stock) {
+      throw new StockError("Estoque não encontrado!", 404);
+    }
   }
 }
 

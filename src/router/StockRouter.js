@@ -4,12 +4,10 @@ import express from "express";
 
 const router = express.Router();
 
-
-
-router.post('/', StockController.createStock);
+router.post("/", AuthService.authentication, StockController.createStock);
 router.get("/", AuthService.authentication, StockController.getAllStocks);
-router.get('/:id', StockController.getStockById);
-router.put('/:id', StockController.updateStock);
-router.delete('/:id', StockController.deleteStock);
+router.get("/:id", AuthService.authentication, StockController.getStockById);
+router.put("/:id", AuthService.authentication, StockController.updateStock);
+router.delete("/:id", AuthService.authentication, StockController.deleteStock);
 
 export default router;
