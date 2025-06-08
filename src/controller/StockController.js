@@ -22,7 +22,7 @@ class StockController {
   async getStockById(req, res, next) {
     try {
       const userId = req.userId;
-      const { id } = parseInt(req.params.id);
+      const id = parseInt(req.params.id);
 
       const stock = await StockService.getStockById(id, userId);
 
@@ -35,7 +35,7 @@ class StockController {
   async updateStock(req, res, next) {
     try {
       const userId = req.userId;
-      const { id } = parseInt(req.params.id);
+      const id = parseInt(req.params.id);
 
       const updatedStock = await StockService.updateStock(id, userId, {
         ...req.body,
@@ -53,7 +53,7 @@ class StockController {
   async deleteStock(req, res, next) {
     try {
       const userId = req.userId;
-      const { id } = parseInt(req.params.id);
+      const id = parseInt(req.params.id);
 
       await StockService.deleteStock(id, userId);
 

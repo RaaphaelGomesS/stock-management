@@ -10,4 +10,4 @@ router.get("/user", AuthService.authentication, UserController.getUser);
 router.put("/user/:id", AuthService.authentication, UserController.updateUser);
 router.delete("/user/:id", AuthService.authentication, UserController.deleteUser);
 
-export default router;  
+export default router;

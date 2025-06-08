@@ -27,8 +27,8 @@ class StockService {
     return stocks;
   }
 
-  async updateStock({ id, userId, ...data }) {
-    await this.findById(id, userId);
+  async updateStock( id, userId, {...data }) {
+    await this.getStockById(id, userId);
 
     const updatedStock = await prisma.stock.update({
       where: { id },
@@ -41,7 +41,7 @@ class StockService {
     return updatedStock;
   }
 
-  async deleteStock(id) {
+  async deleteStock(id, userId) {
     await this.getStockById(id, userId);
 
     return await prisma.stock.delete({
