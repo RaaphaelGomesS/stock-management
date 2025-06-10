@@ -1,74 +1,107 @@
 import prisma from "../../prisma/prismaClient.js";
-import { UserError } from "../error/Error.js";
+import Validation from "../utils/Validation.js";
+import { ProductError, UserError } from "../error/Error.js";
+import UserService from "./UserService.js";
+import TemplateService from "./TemplateService.js";
 
 class ProductService {
-    async Registerproduct(reqBody,) {
-        await this.findProductID(reqBody.id);
+  async registerProduct(userId, reqBody) {
 
-        const product = await Prisma.product.create({
+    console.log(reqBody);
 
-            data: {
-                name: reqBody.name,
-                description: reqBody.description,
-                type: reqBody.type,
-                lote_type: reqBody.lote_type,
-                weight: reqBody.weight,
-                lote_amount: reqBody.lote_amount,
-                quantity: reqBody.quantity,
-                validity: reqBody.validity,
-                column: reqBody.colum,
-                row: reqBody.row,
-                created_date: reqBody.created_date,
-                updated_date: reqBody.updated_date,
-                image: reqBody.image,
-                user_id: user.user_id,
+    Validation.validateTypeAndLoteType(reqBody);
 
-            }
-        })
+    await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
+    
+    const template = await TemplateService.createProductTemplate(reqBody);
 
-        return product;
-    }
-    async updadeProduct(reqBody, user) {
+    const user = await UserService.findById(userId);
+    
+    const product = await prisma.product.create({
+      data: {
+        name: template.name,
+        description: template.description,
+        type: template.type,
+        lote_type: template.lote_type,
+        product_template: template,
+        user: user,
+        shelf: reqBody.shelf,
+        weight: reqBody.weight,
+        lote_amount: reqBody.loteAmount,
+        quantity: reqBody.quantity,
+        validity: reqBody.validity,
+        column: reqBody.column,
+        row: reqBody.row,
+      },
+    });
 
-        const product = await prisma.product.update({
-            where: { id },
-            data: {
-                name: reqBody.name,
-                description: reqBody.description,
-                type: reqBody.type,
-                lote_type: reqBody.lote_type,
-                weight: reqBody.weight,
-                lote_amount: reqBody.lote_amount,
-                quantity: reqBody.quantity,
-                validity: reqBody.validity,
-                column: reqBody.colum,
-                row: reqBody.row,
-                created_date: reqBody.created_date,
-                updated_date: reqBody.updated_date,
-                image: reqBody.image,
-                user_id: user.user_id,
+    return product;
+  }
 
-            }
-        })
-        return product;
+  async updadeProduct(id, userId, reqBody) {
+    const product = await this.findProductById(id);
+
+    if (product.user_id != userId) {
+      throw new UserError(
+        "Não possui permissão para alterar esse produto!",
+        401
+      );
     }
 
-    async deleteProduct(reqBody) {
-        await this.findProductsID(reqBody.id)
-        await prisma.product.delete({
-            where: { id },
-        });
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data: {
+        name: reqBody.name,
+        description: reqBody.description,
+        type: reqBody.type,
+        lote_type: reqBody.loteType,
+        shelf: reqBody.shelf,
+        weight: reqBody.weight,
+        lote_amount: reqBody.loteAmount,
+        quantity: reqBody.quantity,
+        validity: reqBody.validity,
+        column: reqBody.column,
+        row: reqBody.row,
+      },
+    });
+
+    return updatedProduct;
+  }
+
+  async deleteProduct(userId, id) {
+    await this.findProductById(id);
+
+    if (product.user_id != userId) {
+      throw new UserError(
+        "Não possui permissão para alterar esse produto!",
+        401
+      );
     }
 
-    async findProductID(id) {
-        const product = await prisma.product.findUnique({
-            where: { id },
-        });
-        if (!product) {
-            throw new UserError("Produto nao encontrado !", 404);
-        }
-        return product;
-    }
+    await prisma.product.delete({
+      where: { id },
+    });
+  }
 
+  async findProductById(id) {
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+    if (!product) {
+      throw new ProductError("Produto não encontrado!", 404);
+    }
+    return product;
+  }
+
+  async verifyProductAlreadyExist(userId, name, type) {
+    const product = await prisma.product.findFirst({
+      where: { user_id: userId, name: name, type: type },
+    });
+
+    if (product) {
+      throw new ProductError("Produto já registrado!", 400);
+    }
+  }
 }
+
 export default new ProductService();
