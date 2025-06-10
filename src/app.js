@@ -4,6 +4,8 @@ import "dotenv/config";
 import UserRouter from "./router/UserRouter.js";
 import StockRouter from "./router/StockRouter.js";
 import ShelfRouter from "./router/ShelfRouter.js";
+import ProductRouter from "./router/ProductRouter.js"
+import "dotenv/config";
 
 const app = express();
 
@@ -15,6 +17,7 @@ app.use(express.json());
 app.use("/", UserRouter);
 app.use("/stock", StockRouter);
 app.use("/shelf", ShelfRouter);
+app.use("/product", ProductRouter);
 
 //Middleware para disparar os erros
 app.use((err, req, res, next) => {

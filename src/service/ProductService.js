@@ -1,8 +1,8 @@
 import prisma from "../../prisma/prismaClient.js";
 import { UserError } from "../error/Error.js";
 
-class ProductsService {
-    async CreateProduct(reqBody,) {
+class ProductService {
+    async Registerproduct(reqBody,) {
         await this.findProductID(reqBody.id);
 
         const product = await Prisma.product.create({
@@ -28,7 +28,7 @@ class ProductsService {
 
         return product;
     }
-    async updatedProduto(reqBody, user) {
+    async updadeProduct(reqBody, user) {
 
         const product = await prisma.product.update({
             where: { id },
@@ -71,4 +71,4 @@ class ProductsService {
     }
 
 }
-export default new ProductsService();
+export default new ProductService();

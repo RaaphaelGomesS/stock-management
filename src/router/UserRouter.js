@@ -2,6 +2,7 @@ import express from "express";
 import UserController from "../controller/UserController.js";
 import AuthService from "../service/AuthService.js";
 
+
 const router = express.Router();
 
 router.post("/login", UserController.login);
