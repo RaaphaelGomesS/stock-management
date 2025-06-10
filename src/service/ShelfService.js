@@ -1,5 +1,4 @@
 import prisma from "../../prisma/prismaClient.js";
-import Validation from "../utils/Validation.js";
 import { UserError } from "../error/Error.js";
 
 class ShelfService {
@@ -96,8 +95,6 @@ class ShelfService {
     if (data.columns <= 0 || data.rows <= 0) {
       throw new UserError("Colunas e linhas devem ser maiores que zero!", 400);
     }
-
-    // Você pode adicionar validações mais específicas no Validation.js se quiser
   }
 }
 

@@ -3,8 +3,8 @@ import ShelfService from "../service/ShelfService.js";
 class ShelfController {
   async getAll(req, res, next) {
     try {
-      const shelves = await ShelfService.getAllShelves();
-      res.json(shelves);
+      const shelves = await ShelfService.getAllShelves(req.userId);
+      res.status(200).json(shelves);
     } catch (error) {
       next(error);
     }
@@ -12,14 +12,9 @@ class ShelfController {
 
   async getById(req, res, next) {
     try {
-      const { id } = req.params;
+      const id  = req.params.id;
       const shelf = await ShelfService.getShelfById(id);
-
-      if (!shelf) {
-        return res.status(404).json({ message: "Shelf not found" });
-      }
-
-      res.json(shelf);
+      res.status(200).json(shelf);
     } catch (error) {
       next(error);
     }
@@ -36,9 +31,9 @@ class ShelfController {
 
   async update(req, res, next) {
     try {
-      const { id } = req.params;
+      const id  = req.params.id;
       const updatedShelf = await ShelfService.updateShelf(id, req.body);
-      res.json(updatedShelf);
+      res.status(200).json(updatedShelf);
     } catch (error) {
       next(error);
     }
@@ -46,9 +41,9 @@ class ShelfController {
 
   async delete(req, res, next) {
     try {
-      const { id } = req.params;
+      const id  = req.params.id;
       await ShelfService.deleteShelf(id);
-      res.status(204).send();
+      res.status(200).send();
     } catch (error) {
       next(error);
     }
