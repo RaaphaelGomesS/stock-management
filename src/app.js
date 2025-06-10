@@ -4,8 +4,7 @@ import "dotenv/config";
 import UserRouter from "./router/UserRouter.js";
 import StockRouter from "./router/StockRouter.js";
 import ShelfRouter from "./router/ShelfRouter.js";
-import ProductRouter from "./router/ProductRouter.js"
-import "dotenv/config";
+import ProductRouter from "./router/ProductRouter.js";
 
 const app = express();
 
@@ -13,13 +12,11 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-//Configuração das rotas
 app.use("/", UserRouter);
 app.use("/stock", StockRouter);
 app.use("/shelf", ShelfRouter);
 app.use("/product", ProductRouter);
 
-//Middleware para disparar os erros
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
   res.status(status).json({ [err.name]: err.message });

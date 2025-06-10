@@ -2,8 +2,7 @@ import prisma from "../../prisma/prismaClient.js";
 
 class ProductTemplate {
   async createProductTemplate(reqBody) {
-
-    return await prisma.product.create({
+    return await prisma.productTemplate.create({
       data: {
         ean: reqBody.ean,
         name: reqBody.name,

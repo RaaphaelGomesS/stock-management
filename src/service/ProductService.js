@@ -1,30 +1,22 @@
 import prisma from "../../prisma/prismaClient.js";
 import Validation from "../utils/Validation.js";
 import { ProductError, UserError } from "../error/Error.js";
-import UserService from "./UserService.js";
 import TemplateService from "./TemplateService.js";
 
 class ProductService {
   async registerProduct(userId, reqBody) {
-
-    console.log(reqBody);
-
     Validation.validateTypeAndLoteType(reqBody);
 
     await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
-    
+
     const template = await TemplateService.createProductTemplate(reqBody);
 
-    const user = await UserService.findById(userId);
-    
     const product = await prisma.product.create({
       data: {
         name: template.name,
         description: template.description,
         type: template.type,
         lote_type: template.lote_type,
-        product_template: template,
-        user: user,
         shelf: reqBody.shelf,
         weight: reqBody.weight,
         lote_amount: reqBody.loteAmount,
@@ -32,6 +24,16 @@ class ProductService {
         validity: reqBody.validity,
         column: reqBody.column,
         row: reqBody.row,
+        product_template: {
+          connect: {
+            ean: template.ean,
+          },
+        },
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
 
