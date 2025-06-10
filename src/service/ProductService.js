@@ -4,6 +4,27 @@ import { ProductError, UserError } from "../error/Error.js";
 import TemplateService from "./TemplateService.js";
 
 class ProductService {
+
+  async searchProductsByName(userId, query) {
+    if (!query) {
+      return [];
+    }
+
+    const products = await prisma.product.findMany({
+      where: {
+        user_id: userId,
+        name: {
+          contains: query
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return products;
+  }
+
   async registerProduct(userId, reqBody) {
     Validation.validateTypeAndLoteType(reqBody);
 
@@ -85,9 +106,9 @@ class ProductService {
     });
   }
 
-  async findProductById(id) {
+  async findProductById(userId, id) {
     const product = await prisma.product.findUnique({
-      where: { id },
+      where: { user_id: userId, id },
     });
     if (!product) {
       throw new ProductError("Produto não encontrado!", 404);

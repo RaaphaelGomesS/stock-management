@@ -4,6 +4,7 @@ import AuthService from "../service/AuthService.js";
 
 const router = express.Router();
 
+router.get("/search", AuthService.authentication, ProductController.searchProducts);
 router.get("/template/:id", AuthService.authentication,  ProductController.findTemplateId);
 router.post("/", AuthService.authentication, ProductController.registerProduct);
 router.get("/:id", AuthService.authentication, ProductController.findProductId);

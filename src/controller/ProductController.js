@@ -2,16 +2,6 @@ import ProductService from "../service/ProductService.js";
 import TemplateService from "../service/TemplateService.js";
 
 class ProductController {
-  async registerProduct(req, res, next) {
-    try {
-      const userId = req.userId;
-      const product = await ProductService.registerProduct(userId, req.body);
-      res.status(201).json(product);
-    } catch (error) {
-      next(error);
-    }
-  }
-
   async findTemplateId(req, res, next) {
     try {
       const ean = parseInt(req.params.id);
@@ -31,6 +21,27 @@ class ProductController {
       const productId = parseInt(req.params.id);
       const product = await ProductService.findProductById(userId, productId);
       res.status(200).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async searchProducts(req, res, next) {
+    try {
+      const userId = req.userId;
+      const { q } = req.query;
+      const products = await ProductService.searchProductsByName(userId, q);
+      res.status(200).json(products);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+    async registerProduct(req, res, next) {
+    try {
+      const userId = req.userId;
+      const product = await ProductService.registerProduct(userId, req.body);
+      res.status(201).json(product);
     } catch (error) {
       next(error);
     }
