@@ -59,7 +59,7 @@ class ProductController {
       await ProductService.deleteProduct(userId, productId);
       res
         .status(200)
-        .json(`Mensagem: Produto:${productId}, deletado com sucesso!`);
+        .json(`Mensagem: Produto: ${productId}, deletado com sucesso!`);
     } catch (error) {
       next(error);
     }

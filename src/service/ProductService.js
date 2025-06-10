@@ -71,7 +71,7 @@ class ProductService {
   }
 
   async deleteProduct(userId, id) {
-    await this.findProductById(id);
+   const product = await this.findProductById(id);
 
     if (product.user_id != userId) {
       throw new UserError(
