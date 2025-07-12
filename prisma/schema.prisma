@@ -8,49 +8,81 @@ datasource db {
 }
 
 model ProductTemplate {
-  ean         Int               @id @default(autoincrement())
+  ean         Int       @id @default(autoincrement())
   name        String
   description String?
-  type        product_type      @default(GENERICO)
-  lote_type   product_lote_type @default(UNIDADE)
-  product     product[]
+  type        type      @default(GENERICO)
+  loteType    lote_type @default(UNIDADE) @map("lote_type")
+  weight      Decimal?  @db.Decimal(5, 2)
+  loteAmount  Int       @map("lote_amount")
+  image       String?
+  product     product[] @ignore
 
   @@map("product_template")
 }
 
 model product {
-  id               Int               @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
+  shelf_id         Int
   template_id      Int
   name             String
   description      String?
-  type             product_type      @default(GENERICO)
-  lote_type        product_lote_type @default(UNIDADE)
-  weight           Decimal?          @db.Decimal(5, 2)
-  lote_amount      Int?
-  quantity         Int?
+  type             type            @default(GENERICO)
+  lote_type        lote_type       @default(UNIDADE)
+  weight           Decimal?        @db.Decimal(5, 2)
+  lote_amount      Int
+  quantity         Int
   validity         String?
   column           Int?
-  row              Int?
-  created_date     DateTime          @default(now())
-  updated_date     DateTime          @updatedAt
+  row              Int
+  created_date     DateTime        @default(now())
+  updated_date     DateTime        @updatedAt
+  image            String?
   user_id          Int
-  shelf            Int?
-  product_template ProductTemplate   @relation(fields: [template_id], references: [ean], map: "Product_template_id_fkey")
-  user             user              @relation(fields: [user_id], references: [id])
+  shelf            shelf           @relation(fields: [shelf_id], references: [id], map: "Product_shelf_id_fkey")
+  product_template ProductTemplate @relation(fields: [template_id], references: [ean], map: "Product_template_id_fkey")
 
+  @@index([shelf_id], map: "Product_shelf_id_fkey")
   @@index([template_id], map: "Product_template_id_fkey")
-  @@index([user_id], map: "product_user_id_fkey")
+}
+
+model shelf {
+  id           Int       @id @default(autoincrement())
+  stock_id     Int
+  columns      Int
+  rows         Int
+  destination  type      @default(GENERICO)
+  restriction  String?
+  full         Boolean   @default(false)
+  created_date DateTime  @default(now())
+  updated_date DateTime  @updatedAt
+  user_id      Int
+  product      product[]
+  stock        stock     @relation(fields: [stock_id], references: [id], map: "Shelf_stock_id_fkey")
+
+  @@index([stock_id], map: "Shelf_stock_id_fkey")
+}
+
+model stock {
+  id          Int     @id @default(autoincrement())
+  user_id     Int
+  name        String?
+  description String?
+  shelf       shelf[]
+  user        user    @relation(fields: [user_id], references: [id], map: "Stock_user_id_fkey")
+
+  @@index([user_id], map: "Stock_user_id_fkey")
 }
 
 model user {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique(map: "User_email_key")
+  id       Int     @id @default(autoincrement())
+  email    String  @unique(map: "User_email_key")
   password String
   name     String?
-  products product[]
+  stock    stock[]
 }
 
-enum product_type {
+enum type {
   GENERICO
   LIMPEZA
   CONSERVA
@@ -58,7 +90,7 @@ enum product_type {
   BEBIDAS
 }
 
-enum product_lote_type {
+enum lote_type {
   UNIDADE
   CAIXA
   ENGRADADO
