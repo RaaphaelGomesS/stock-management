@@ -23,7 +23,7 @@ class Validation {
     }
   }
 
-  validateTypeAndLoteType(reqBody, defaultType = product_type.GENERICO, defaultLotType = product_lote_type.UNIDADE) {
+  validateTypes(reqBody, defaultType = product_type.GENERICO, defaultLotType = product_lote_type.UNIDADE) {
     const type = reqBody.type;
     const loteType = reqBody.loteType;
 

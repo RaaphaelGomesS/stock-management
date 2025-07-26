@@ -16,9 +16,6 @@ class ProductController {
     try {
       const ean = parseInt(req.params.id);
       const template = await TemplateService.findTemplateByEan(ean);
-      if (!template) {
-        res.status(301).json("Template não encontrado.");
-      }
       res.status(200).json(template);
     } catch (error) {
       next(error);

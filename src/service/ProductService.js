@@ -5,18 +5,22 @@ import TemplateService from "./TemplateService.js";
 
 class ProductService {
   async registerProduct(userId, reqBody) {
-    Validation.validateTypeAndLoteType(reqBody);
+    Validation.validateTypes(reqBody);
 
     await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
 
-    const template = await TemplateService.createProductTemplate(reqBody);
+    let template = await TemplateService.findTemplateByEan(reqBody.ean);
+
+    if (!template) {
+      template = await TemplateService.createProductTemplate(reqBody);
+    }
 
     const product = await prisma.product.create({
       data: {
         name: template.name,
         description: template.description,
         type: template.type,
-        lote_type: template.lote_type,
+        lote_type: template.loteType,
         shelf: reqBody.shelf,
         weight: reqBody.weight,
         lote_amount: reqBody.loteAmount,
@@ -44,10 +48,7 @@ class ProductService {
     const product = await this.findProductById(id);
 
     if (product.user_id != userId) {
-      throw new UserError(
-        "Não possui permissão para alterar esse produto!",
-        401
-      );
+      throw new UserError("Não possui permissão para alterar esse produto!", 401);
     }
 
     const updatedProduct = await prisma.product.update({

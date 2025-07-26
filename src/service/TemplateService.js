@@ -14,9 +14,15 @@ class ProductTemplate {
   }
 
   async findTemplateByEan(ean) {
-    return await prisma.productTemplate.findUnique({
+    const template = prisma.productTemplate.findUnique({
       where: { ean },
     });
+
+    if (!template) {
+      throw new ProductError("Template não encontrado!", 404);
+    }
+    
+    return template;
   }
 }
 
