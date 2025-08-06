@@ -4,7 +4,8 @@ class StockController {
   async createStock(req, res, next) {
     try {
       const stock = await StockService.createStock(req.body, req.userId);
-      res.status(201).json({ message: "Estoque criado com sucesso", stock });
+
+      res.status(201).json(stock);
     } catch (error) {
       next(error);
     }
@@ -13,6 +14,7 @@ class StockController {
   async getAllStocks(req, res, next) {
     try {
       const stocks = await StockService.getAllStocks(req.userId);
+
       res.status(200).json(stocks);
     } catch (error) {
       next(error);
@@ -21,10 +23,9 @@ class StockController {
 
   async getStockById(req, res, next) {
     try {
-      const userId = req.userId;
       const id = parseInt(req.params.id);
 
-      const stock = await StockService.getStockById(id, userId);
+      const stock = await StockService.getStockById(id, req.userId);
 
       res.status(200).json(stock);
     } catch (error) {
@@ -34,17 +35,11 @@ class StockController {
 
   async updateStock(req, res, next) {
     try {
-      const userId = req.userId;
       const id = parseInt(req.params.id);
 
-      const updatedStock = await StockService.updateStock(id, userId, {
-        ...req.body,
-      });
+      const updatedStock = await StockService.updateStock(id, req.userId, req.body);
 
-      res.status(200).json({
-        message: "Estoque atualizado com sucesso",
-        stock: updatedStock,
-      });
+      res.status(200).json(updatedStock);
     } catch (error) {
       next(error);
     }
@@ -57,9 +52,7 @@ class StockController {
 
       await StockService.deleteStock(id, userId);
 
-      res
-        .status(200)
-        .json({ message: `Mensagem: Estoque: ${id}, deletado com sucesso!` });
+      res.status(200).json({ message: `Estoque: ${id}, deletado com sucesso!` });
     } catch (error) {
       next(error);
     }

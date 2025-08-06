@@ -4,8 +4,11 @@ import TemplateService from "../service/TemplateService.js";
 class ProductController {
   async registerProduct(req, res, next) {
     try {
-      const userId = req.userId;
-      const product = await ProductService.registerProduct(userId, req.body);
+      const product = await ProductService.registerProduct(
+        req.userId,
+        req.body
+      );
+
       res.status(201).json(product);
     } catch (error) {
       next(error);
@@ -16,6 +19,7 @@ class ProductController {
     try {
       const ean = parseInt(req.params.id);
       const template = await TemplateService.findTemplateByEan(ean);
+
       res.status(200).json(template);
     } catch (error) {
       next(error);
@@ -24,9 +28,12 @@ class ProductController {
 
   async findProductId(req, res, next) {
     try {
-      const userId = req.userId;
       const productId = parseInt(req.params.id);
-      const product = await ProductService.findProductById(userId, productId);
+      const product = await ProductService.findProductById(
+        req.userId,
+        productId
+      );
+
       res.status(200).json(product);
     } catch (error) {
       next(error);
@@ -35,13 +42,13 @@ class ProductController {
 
   async updadeProduct(req, res, next) {
     try {
-      const userId = req.userId;
       const productId = parseInt(req.params.id);
       const product = await ProductService.updadeProduct(
-        userId,
+        req.userId,
         productId,
         req.body
       );
+
       res.status(200).json(product);
     } catch (error) {
       next(error);
@@ -50,13 +57,11 @@ class ProductController {
 
   async deleteProduct(req, res, next) {
     try {
-      const userId = req.userId;
       const productId = parseInt(req.params.id);
 
-      await ProductService.deleteProduct(userId, productId);
-      res
-        .status(200)
-        .json(`Mensagem: Produto:${productId}, deletado com sucesso!`);
+      await ProductService.deleteProduct(req.userId, productId);
+
+      res.status(200).json({ message: `Produto:${productId}, deletado com sucesso!` });
     } catch (error) {
       next(error);
     }

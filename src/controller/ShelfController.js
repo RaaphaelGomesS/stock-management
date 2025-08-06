@@ -1,9 +1,12 @@
-import ShelfService from "../service/ShelfService.js"; 
+import ShelfService from "../service/ShelfService.js";
 
 class ShelfController {
-  async getAll(req, res, next) {
+  async getAllShelvesInStock(req, res, next) {
     try {
-      const shelves = await ShelfService.getAllShelves(req.userId);
+      const stockId = req.params.id;
+
+      const shelves = await ShelfService.getAllShelves(req.userId, stockId);
+
       res.status(200).json(shelves);
     } catch (error) {
       next(error);
@@ -12,38 +15,42 @@ class ShelfController {
 
   async getById(req, res, next) {
     try {
-      const id  = req.params.id;
+      const id = req.params.id;
       const shelf = await ShelfService.getShelfById(id);
+
       res.status(200).json(shelf);
     } catch (error) {
       next(error);
     }
   }
 
-  async create(req, res, next) {
+  async createShelf(req, res, next) {
     try {
       const newShelf = await ShelfService.createShelf(req.body);
+
       res.status(201).json(newShelf);
     } catch (error) {
       next(error);
     }
   }
 
-  async update(req, res, next) {
+  async updateShelf(req, res, next) {
     try {
-      const id  = req.params.id;
+      const id = req.params.id;
       const updatedShelf = await ShelfService.updateShelf(id, req.body);
+
       res.status(200).json(updatedShelf);
     } catch (error) {
       next(error);
     }
   }
 
-  async delete(req, res, next) {
+  async deleteShelf(req, res, next) {
     try {
-      const id  = req.params.id;
+      const id = req.params.id;
       await ShelfService.deleteShelf(id);
-      res.status(200).send();
+
+      res.status(200).json({ message: `Estante:${id}, deletado com sucesso!` });
     } catch (error) {
       next(error);
     }

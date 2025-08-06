@@ -21,3 +21,11 @@ export class ProductError extends Error {
     this.statusCode = statusCode;
   }
 }
+
+export class ShelfError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.name = "ShelfError";
+    this.statusCode = statusCode;
+  }
+}

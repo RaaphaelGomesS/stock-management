@@ -75,10 +75,7 @@ class ProductService {
     await this.findProductById(id);
 
     if (product.user_id != userId) {
-      throw new UserError(
-        "Não possui permissão para alterar esse produto!",
-        401
-      );
+      throw new UserError("Não possui permissão para alterar esse produto!", 401);
     }
 
     await prisma.product.delete({
