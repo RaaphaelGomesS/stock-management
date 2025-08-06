@@ -55,6 +55,17 @@ class ShelfController {
       next(error);
     }
   }
+
+    async getShelfLayout(req, res, next) {
+    try {
+      const id = req.params.id;
+      const layout = await ShelfService.createShelfLayout(id);
+
+      res.status(200).json(layout);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new ShelfController();

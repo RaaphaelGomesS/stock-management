@@ -1,9 +1,10 @@
 import prisma from "../../prisma/prismaClient.js";
 import { ShelfError } from "../error/Error.js";
+import Validation from "../utils/Validation.js";
 
 class ShelfService {
   async createShelf(data) {
-    this.validateShelfData(data);
+    Validation.validateShelfData(data);
 
     const shelf = await prisma.shelf.create({
       data: {
@@ -23,7 +24,7 @@ class ShelfService {
 
   async updateShelf(id, data) {
     await this.findById(id);
-    this.validateShelfData(data);
+    Validation.validateShelfData(data);
 
     return await prisma.shelf.update({
       where: { id: Number(id) },
@@ -52,7 +53,7 @@ class ShelfService {
     return prisma.shelf.findMany({
       where: {
         user_id: userId,
-      }
+      },
     });
   }
 
@@ -72,6 +73,38 @@ class ShelfService {
     return shelf;
   }
 
+  async createShelfLayout(shelfId) {
+    const shelfWithProducts = await prisma.shelf.findUnique({
+      where: { id: shelfId },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            column: true,
+            row: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    if (!shelfWithProducts) {
+      throw new ShelfError(`Prateleira com ID ${shelfId} não encontrada.`, 404);
+    }
+
+    const { rows, columns, product: products } = shelfWithProducts;
+    const layoutMatriz = Array(rows).fill(null).map(() => Array(columns).fill(null));
+
+    for (const p of products) {
+      if (p.row != null && p.column != null) {
+        layoutMatriz[p.row][p.column] = p;
+      }
+    }
+
+    return layoutMatriz;
+  }
+
   async findById(id) {
     const shelf = await prisma.shelf.findUnique({
       where: { id: Number(id) },
@@ -82,25 +115,6 @@ class ShelfService {
     }
 
     return shelf;
-  }
-
-  validateShelfData(data) {
-    if (
-      !data.stock_id ||
-      !data.columns ||
-      !data.rows ||
-      !data.destination ||
-      !data.user_id
-    ) {
-      throw new ShelfError(
-        "Campos obrigatórios da prateleira estão faltando!",
-        400
-      );
-    }
-
-    if (data.columns <= 0 || data.rows <= 0) {
-      throw new ShelfError("Colunas e linhas devem ser maiores que zero!", 400);
-    }
   }
 }
 

@@ -38,6 +38,25 @@ class Validation {
       reqBody.loteType = defaultLotType;
     }
   }
+
+    validateShelfData(data) {
+    if (
+      !data.stock_id ||
+      !data.columns ||
+      !data.rows ||
+      !data.destination ||
+      !data.user_id
+    ) {
+      throw new ShelfError(
+        "Campos obrigatórios da prateleira estão faltando!",
+        400
+      );
+    }
+
+    if (data.columns <= 0 || data.rows <= 0) {
+      throw new ShelfError("Colunas e linhas devem ser maiores que zero!", 400);
+    }
+  }
 }
 
 export default new Validation();
