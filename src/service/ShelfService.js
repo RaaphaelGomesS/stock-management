@@ -25,7 +25,7 @@ class ShelfService {
     await this.findById(id);
     this.validateShelfData(data);
 
-    const updatedShelf = await prisma.shelf.update({
+    return await prisma.shelf.update({
       where: { id: Number(id) },
       data: {
         stock_id: data.stock_id,
@@ -38,8 +38,6 @@ class ShelfService {
         user_id: data.user_id,
       },
     });
-
-    return updatedShelf;
   }
 
   async deleteShelf(id) {
