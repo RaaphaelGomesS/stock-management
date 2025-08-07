@@ -40,6 +40,28 @@ class ProductController {
     }
   }
 
+  async findAllProductsInShelf(req, res, next) {
+    try {
+      const shelfId = parseInt(req.params.id);
+
+      const products = await ProductService.findAllProductsInShelf(shelfId);
+
+      res.status(200).json(products);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+    async recentChangedProducts(req, res, next) {
+    try {
+      const products = await ProductService.productHistorical(req.userId);
+
+      res.status(200).json(products);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async updadeProduct(req, res, next) {
     try {
       const productId = parseInt(req.params.id);

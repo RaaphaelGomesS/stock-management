@@ -2,6 +2,7 @@ import prisma from "../../prisma/prismaClient.js";
 import Validation from "../utils/Validation.js";
 import { ProductError, UserError } from "../error/Error.js";
 import TemplateService from "./TemplateService.js";
+import ShelfService from "./ShelfService.js";
 
 class ProductService {
   async registerProduct(userId, reqBody) {
@@ -15,40 +16,59 @@ class ProductService {
       template = await TemplateService.createProductTemplate(reqBody);
     }
 
-    const product = await prisma.product.create({
-      data: {
-        name: template.name,
-        description: template.description,
-        type: template.type,
-        lote_type: template.loteType,
-        shelf: reqBody.shelf,
-        weight: reqBody.weight,
-        lote_amount: reqBody.loteAmount,
-        quantity: reqBody.quantity,
-        validity: reqBody.validity,
-        column: reqBody.column,
-        row: reqBody.row,
-        product_template: {
-          connect: {
-            ean: template.ean,
-          },
-        },
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-      },
-    });
+    ShelfService.verifyCanPutProduct(
+      reqBody.shelf,
+      reqBody.row,
+      reqBody.column
+    );
 
-    return product;
+    try {
+      const newProduct = await prisma.$transaction(async (tx) => {
+        const createProduct = await tx.product.create({
+          data: {
+            name: template.name,
+            description: template.description,
+            type: template.type,
+            lote_type: template.loteType,
+            shelf: reqBody.shelf,
+            weight: reqBody.weight,
+            lote_amount: reqBody.loteAmount,
+            quantity: reqBody.quantity,
+            validity: reqBody.validity,
+            column: reqBody.column,
+            row: reqBody.row,
+            product_template: {
+              connect: {
+                ean: template.ean,
+              },
+            },
+            user: {
+              connect: {
+                id: userId,
+              },
+            },
+          },
+        });
+
+        await ShelfService.updateShelfFullStatus(createProduct.shelf_id);
+
+        return createProduct;
+      });
+
+      return newProduct;
+    } catch (error) {
+      throw new ProductError(`Falha ao salvar o produto e atualizar a prateleira`, 400);
+    }
   }
 
   async updadeProduct(id, userId, reqBody) {
     const product = await this.findProductById(id);
 
     if (product.user_id != userId) {
-      throw new UserError("Não possui permissão para alterar esse produto!", 401);
+      throw new UserError(
+        "Não possui permissão para alterar esse produto!",
+        401
+      );
     }
 
     const updatedProduct = await prisma.product.update({
@@ -75,7 +95,10 @@ class ProductService {
     await this.findProductById(id);
 
     if (product.user_id != userId) {
-      throw new UserError("Não possui permissão para alterar esse produto!", 401);
+      throw new UserError(
+        "Não possui permissão para alterar esse produto!",
+        401
+      );
     }
 
     await prisma.product.delete({
@@ -91,6 +114,44 @@ class ProductService {
       throw new ProductError("Produto não encontrado!", 404);
     }
     return product;
+  }
+
+  async findAllProductsInShelf(shelfId) {
+    const products = await prisma.product.findMany({
+      where: {
+        shelf_id: shelfId,
+      },
+    });
+
+    if (!products) {
+      throw new ProductError(
+        `Nenhum produto encontrado na prateleira ${shelfId}`,
+        404
+      );
+    }
+
+    return products;
+  }
+
+  async productHistorical(userId) {
+    const products = await prisma.product.findMany({
+      take: 5,
+      where: {
+        userId: userId,
+      },
+      orderBy: {
+        updated_date: "desc",
+      },
+    });
+
+    if (!products) {
+      throw new ProductError(
+        `Nenhum produto encontrado para o usuário ${userId}`,
+        404
+      );
+    }
+
+    return products;
   }
 
   async verifyProductAlreadyExist(userId, name, type) {

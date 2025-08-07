@@ -1,6 +1,7 @@
 import prisma from "../../prisma/prismaClient.js";
 import { ShelfError } from "../error/Error.js";
 import Validation from "../utils/Validation.js";
+import ProductService from "./ProductService.js";
 
 class ShelfService {
   async createShelf(data) {
@@ -94,7 +95,9 @@ class ShelfService {
     }
 
     const { rows, columns, product: products } = shelfWithProducts;
-    const layoutMatriz = Array(rows).fill(null).map(() => Array(columns).fill(null));
+    const layoutMatriz = Array(rows)
+      .fill(null)
+      .map(() => Array(columns).fill(null));
 
     for (const p of products) {
       if (p.row != null && p.column != null) {
@@ -115,6 +118,52 @@ class ShelfService {
     }
 
     return shelf;
+  }
+
+  async verifyCanPutProduct(shelfId, row, collumn) {
+    const shelf = await prisma.shelf.findUnique({
+      where: { id: Number(shelfId) },
+      include: {
+        product: {
+          where: {
+            row: row,
+            column: collumn,
+          },
+        },
+      },
+    });
+
+    if (shelf.full) {
+      throw new ShelfError(
+        `A prateleira ${shelfId} está cheia, não pode ser adicionado outro produto.`,
+        400
+      );
+    }
+
+    if (shelf.product.length > 0) {
+      throw new ShelfError(
+        "Já possui um produto na posição da prateleira.",
+        400
+      );
+    }
+  }
+
+  async updateShelfFullStatus(shelfId) {
+    const shelf = await this.findById(shelfId);
+
+    const products = await ProductService.findAllProductsInShelf(shelfId);
+
+    const capacity = shelf.rows * shelf.columns;
+
+    const isFull = products.length >= capacity;
+
+    if (shelf.full !== isFull) {
+      await db.shelf.update({
+        where: { id: shelfId },
+        data: { full: isFull },
+      });
+      console.log(`Status da prateleira ${shelfId} atualizado para: ${isFull}`);
+    }
   }
 }
 
