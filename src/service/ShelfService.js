@@ -1,7 +1,6 @@
 import prisma from "../../prisma/prismaClient.js";
 import { ShelfError } from "../error/Error.js";
 import Validation from "../utils/Validation.js";
-import ProductService from "./ProductService.js";
 
 class ShelfService {
   async createShelf(data) {
@@ -15,7 +14,6 @@ class ShelfService {
         destination: data.destination,
         restriction: data.restriction,
         full: false,
-        updated_date: new Date(),
         user_id: data.user_id,
       },
     });
@@ -36,7 +34,6 @@ class ShelfService {
         destination: data.destination,
         restriction: data.restriction,
         full: data.full,
-        updated_date: new Date(),
         user_id: data.user_id,
       },
     });
@@ -56,22 +53,6 @@ class ShelfService {
         user_id: userId,
       },
     });
-  }
-
-  async getShelfById(id) {
-    const shelf = await prisma.shelf.findUnique({
-      where: { id: Number(id) },
-      include: {
-        product: true,
-        stock: true,
-      },
-    });
-
-    if (!shelf) {
-      throw new ShelfError("Prateleira não encontrada!", 404);
-    }
-
-    return shelf;
   }
 
   async createShelfLayout(shelfId) {
@@ -148,21 +129,31 @@ class ShelfService {
     }
   }
 
-  async updateShelfFullStatus(shelfId) {
-    const shelf = await this.findById(shelfId);
+  async updateShelfFullStatus(shelfId, prismaTx) {
+    const db = prismaTx || prisma;
 
-    const products = await ProductService.findAllProductsInShelf(shelfId);
-
-    const capacity = shelf.rows * shelf.columns;
-
-    const isFull = products.length >= capacity;
-
-    if (shelf.full !== isFull) {
-      await db.shelf.update({
+    try {
+      const shelf = await db.shelf.findUniqueOrThrow({
         where: { id: shelfId },
-        data: { full: isFull },
       });
-      console.log(`Status da prateleira ${shelfId} atualizado para: ${isFull}`);
+
+      const capacity = shelf.rows * shelf.columns;
+
+      const productCount = await db.product.count({
+        where: { shelf_id: shelfId },
+      });
+
+      const isFull = productCount >= capacity;
+
+      if (shelf.full !== isFull) {
+        await db.shelf.update({
+          where: { id: shelfId },
+          data: { full: isFull },
+        });
+        console.log(`Status da prateleira ${shelfId} atualizado para: ${isFull}`);
+      }
+    } catch (error) {
+      throw new ShelfError("Erro ao atualizar status da prateleira.", 400);
     }
   }
 }

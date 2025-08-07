@@ -10,12 +10,6 @@ class ProductService {
 
     await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
 
-    let template = await TemplateService.findTemplateByEan(reqBody.ean);
-
-    if (!template) {
-      template = await TemplateService.createProductTemplate(reqBody);
-    }
-
     ShelfService.verifyCanPutProduct(
       reqBody.shelf,
       reqBody.row,
@@ -24,6 +18,14 @@ class ProductService {
 
     try {
       const newProduct = await prisma.$transaction(async (tx) => {
+        let template = await prisma.productTemplate.findUnique({
+          where: { ean: reqBody.ean },
+        });
+
+        if (!template) {
+          template = await TemplateService.createProductTemplate(reqBody, tx);
+        }
+
         const createProduct = await tx.product.create({
           data: {
             name: template.name,
@@ -50,18 +52,21 @@ class ProductService {
           },
         });
 
-        await ShelfService.updateShelfFullStatus(createProduct.shelf_id);
+        await ShelfService.updateShelfFullStatus(createProduct.shelf_id, tx);
 
         return createProduct;
       });
 
       return newProduct;
     } catch (error) {
-      throw new ProductError(`Falha ao salvar o produto e atualizar a prateleira`, 400);
+      throw new ProductError(
+        `Falha ao salvar o produto e atualizar a prateleira`,
+        400
+      );
     }
   }
 
-  async updadeProduct(id, userId, reqBody) {
+  async updateProduct(id, userId, reqBody) {
     const product = await this.findProductById(id);
 
     if (product.user_id != userId) {
@@ -92,7 +97,7 @@ class ProductService {
   }
 
   async deleteProduct(userId, id) {
-    await this.findProductById(id);
+    const product = await this.findProductById(id);
 
     if (product.user_id != userId) {
       throw new UserError(
@@ -101,8 +106,12 @@ class ProductService {
       );
     }
 
-    await prisma.product.delete({
-      where: { id },
+    return prisma.$transaction(async (tx) => {
+      await prisma.product.delete({
+        where: { id },
+      });
+
+      await ShelfService.updateShelfFullStatus(product.shelf_id, tx);
     });
   }
 
@@ -123,7 +132,7 @@ class ProductService {
       },
     });
 
-    if (!products) {
+    if (products.length === 0) {
       throw new ProductError(
         `Nenhum produto encontrado na prateleira ${shelfId}`,
         404
@@ -144,7 +153,7 @@ class ProductService {
       },
     });
 
-    if (!products) {
+    if (products.length === 0) {
       throw new ProductError(
         `Nenhum produto encontrado para o usuário ${userId}`,
         404

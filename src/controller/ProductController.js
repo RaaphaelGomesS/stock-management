@@ -62,10 +62,10 @@ class ProductController {
     }
   }
 
-  async updadeProduct(req, res, next) {
+  async updateProduct(req, res, next) {
     try {
       const productId = parseInt(req.params.id);
-      const product = await ProductService.updadeProduct(
+      const product = await ProductService.updateProduct(
         req.userId,
         productId,
         req.body

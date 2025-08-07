@@ -1,8 +1,10 @@
 import prisma from "../../prisma/prismaClient.js";
 
 class ProductTemplate {
-  async createProductTemplate(reqBody) {
-    return await prisma.productTemplate.create({
+  async createProductTemplate(reqBody, prismaTx) {
+    const db = prismaTx || prisma;
+
+    return await db.productTemplate.create({
       data: {
         ean: reqBody.ean,
         name: reqBody.name,
@@ -21,7 +23,7 @@ class ProductTemplate {
     if (!template) {
       throw new ProductError("Template não encontrado!", 404);
     }
-    
+
     return template;
   }
 }

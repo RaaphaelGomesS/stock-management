@@ -4,7 +4,8 @@ import AuthService from "../service/AuthService.js";
 
 const router = express.Router();
 
-router.get("/", AuthService.authentication, ShelfController.getAll);
+router.get("/stocked/:id", AuthService.authentication, ShelfController.getAllShelvesInStock);
+router.get("/layout", AuthService.authentication, ShelfController.getShelfLayout);
 router.post("/", AuthService.authentication, ShelfController.createShelf);
 router.put("/:id", AuthService.authentication, ShelfController.updateShelf);
 router.get("/:id", AuthService.authentication, ShelfController.getById);
