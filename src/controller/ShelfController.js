@@ -56,7 +56,7 @@ class ShelfController {
     }
   }
 
-    async getShelfLayout(req, res, next) {
+  async getShelfLayout(req, res, next) {
     try {
       const id = req.params.id;
       const layout = await ShelfService.createShelfLayout(id);

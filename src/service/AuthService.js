@@ -24,10 +24,7 @@ class AuthService {
 
   verifyHavePermission(tokenId, userId) {
     if (tokenId != userId) {
-      throw new UserError(
-        "você não possui permissão para acessar/alterar informações de outro usuário!",
-        403
-      );
+      throw new UserError("você não possui permissão para acessar/alterar informações de outro usuário!", 403);
     }
   }
 }

@@ -10,11 +10,7 @@ class ProductService {
 
     await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
 
-    ShelfService.verifyCanPutProduct(
-      reqBody.shelf,
-      reqBody.row,
-      reqBody.column
-    );
+    ShelfService.verifyCanPutProduct(reqBody.shelf, reqBody.row, reqBody.column);
 
     try {
       const newProduct = await prisma.$transaction(async (tx) => {
@@ -59,33 +55,21 @@ class ProductService {
 
       return newProduct;
     } catch (error) {
-      throw new ProductError(
-        `Falha ao salvar o produto e atualizar a prateleira`,
-        400
-      );
+      throw new ProductError(`Falha ao salvar o produto e atualizar a prateleira`, 400);
     }
   }
 
   async updateProduct(id, userId, reqBody) {
+    Validation.validateTypes(reqBody);
+
     const product = await this.findProductById(id);
 
     if (product.user_id != userId) {
-      throw new UserError(
-        "Não possui permissão para alterar esse produto!",
-        401
-      );
+      throw new UserError("Não possui permissão para alterar esse produto!", 401);
     }
 
-    if (
-      reqBody.shelfId !== product.shelf_id ||
-      reqBody.row !== product.row ||
-      reqBody.column !== product.column
-    ) {
-      ShelfService.verifyCanPutProduct(
-        reqBody.shelf,
-        reqBody.row,
-        reqBody.column
-      );
+    if (reqBody.shelfId !== product.shelf_id || reqBody.row !== product.row || reqBody.column !== product.column) {
+      ShelfService.verifyCanPutProduct(reqBody.shelf, reqBody.row, reqBody.column);
 
       return prisma.$transaction(async (tx) => {
         const updatedProduct = await tx.product.update({
@@ -130,14 +114,32 @@ class ProductService {
     }
   }
 
+  async adjustQuantity(userId, productId, reqBody) {
+    Validation.validateTypes(reqBody);
+
+    const product = await this.findProductById(productId);
+
+    if (product.user_id != userId) {
+      throw new UserError("Não possui permissão para alterar esse produto!", 401);
+    }
+
+    const quantityWithAdjust = product.quantity + parseInt(reqBody.adjustment);
+
+    return prisma.product.update({
+      where: {
+        id: product.id,
+      },
+      data: {
+        quantity: quantityWithAdjust,
+      },
+    });
+  }
+
   async deleteProduct(userId, id) {
     const product = await this.findProductById(id);
 
     if (product.user_id != userId) {
-      throw new UserError(
-        "Não possui permissão para alterar esse produto!",
-        401
-      );
+      throw new UserError("Não possui permissão para alterar esse produto!", 401);
     }
 
     return prisma.$transaction(async (tx) => {
@@ -167,10 +169,7 @@ class ProductService {
     });
 
     if (products.length === 0) {
-      throw new ProductError(
-        `Nenhum produto encontrado na prateleira ${shelfId}`,
-        404
-      );
+      throw new ProductError(`Nenhum produto encontrado na prateleira ${shelfId}`, 404);
     }
 
     return products;
@@ -188,10 +187,7 @@ class ProductService {
     });
 
     if (products.length === 0) {
-      throw new ProductError(
-        `Nenhum produto encontrado para o usuário ${userId}`,
-        404
-      );
+      throw new ProductError(`Nenhum produto encontrado para o usuário ${userId}`, 404);
     }
 
     return products;

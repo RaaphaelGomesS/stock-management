@@ -4,10 +4,7 @@ import TemplateService from "../service/TemplateService.js";
 class ProductController {
   async registerProduct(req, res, next) {
     try {
-      const product = await ProductService.registerProduct(
-        req.userId,
-        req.body
-      );
+      const product = await ProductService.registerProduct(req.userId, req.body);
 
       res.status(201).json(product);
     } catch (error) {
@@ -29,10 +26,7 @@ class ProductController {
   async findProductId(req, res, next) {
     try {
       const productId = parseInt(req.params.id);
-      const product = await ProductService.findProductById(
-        req.userId,
-        productId
-      );
+      const product = await ProductService.findProductById(req.userId, productId);
 
       res.status(200).json(product);
     } catch (error) {
@@ -52,7 +46,7 @@ class ProductController {
     }
   }
 
-    async recentChangedProducts(req, res, next) {
+  async recentChangedProducts(req, res, next) {
     try {
       const products = await ProductService.productHistorical(req.userId);
 
@@ -62,14 +56,21 @@ class ProductController {
     }
   }
 
+  async adjustQuantity(req, res, next) {
+    try {
+      const productId = parseInt(req.params.id);
+      const product = await ProductService.adjustQuantity(req.userId, productId, req.body);
+
+      res.status(200).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async updateProduct(req, res, next) {
     try {
       const productId = parseInt(req.params.id);
-      const product = await ProductService.updateProduct(
-        req.userId,
-        productId,
-        req.body
-      );
+      const product = await ProductService.updateProduct(req.userId, productId, req.body);
 
       res.status(200).json(product);
     } catch (error) {

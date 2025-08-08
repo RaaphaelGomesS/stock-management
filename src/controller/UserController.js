@@ -44,7 +44,7 @@ class UserController {
       AuthService.verifyHavePermission(req.userId, userId);
       await UserService.deleteUser(userId);
 
-      res.status(200).json({message:`Usuário:${userId}, deletado com sucesso!`});
+      res.status(200).json({ message: `Usuário:${userId}, deletado com sucesso!` });
     } catch (error) {
       next(error);
     }

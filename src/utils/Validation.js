@@ -39,18 +39,9 @@ class Validation {
     }
   }
 
-    validateShelfData(data) {
-    if (
-      !data.stock_id ||
-      !data.columns ||
-      !data.rows ||
-      !data.destination ||
-      !data.user_id
-    ) {
-      throw new ShelfError(
-        "Campos obrigatórios da prateleira estão faltando!",
-        400
-      );
+  validateShelfData(data) {
+    if (!data.stock_id || !data.columns || !data.rows || !data.destination || !data.user_id) {
+      throw new ShelfError("Campos obrigatórios da prateleira estão faltando!", 400);
     }
 
     if (data.columns <= 0 || data.rows <= 0) {

@@ -115,17 +115,11 @@ class ShelfService {
     });
 
     if (shelf.full) {
-      throw new ShelfError(
-        `A prateleira ${shelfId} está cheia, não pode ser adicionado outro produto.`,
-        400
-      );
+      throw new ShelfError(`A prateleira ${shelfId} está cheia, não pode ser adicionado outro produto.`, 400);
     }
 
     if (shelf.product.length > 0) {
-      throw new ShelfError(
-        "Já possui um produto na posição da prateleira.",
-        400
-      );
+      throw new ShelfError("Já possui um produto na posição da prateleira.", 400);
     }
   }
 

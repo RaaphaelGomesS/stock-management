@@ -27,7 +27,7 @@ class StockService {
     return stocks;
   }
 
-  async updateStock( id, userId, {...data }) {
+  async updateStock(id, userId, { ...data }) {
     await this.getStockById(id, userId);
 
     const updatedStock = await prisma.stock.update({
