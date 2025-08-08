@@ -76,24 +76,58 @@ class ProductService {
       );
     }
 
-    const updatedProduct = await prisma.product.update({
-      where: { id },
-      data: {
-        name: reqBody.name,
-        description: reqBody.description,
-        type: reqBody.type,
-        lote_type: reqBody.loteType,
-        shelf: reqBody.shelf,
-        weight: reqBody.weight,
-        lote_amount: reqBody.loteAmount,
-        quantity: reqBody.quantity,
-        validity: reqBody.validity,
-        column: reqBody.column,
-        row: reqBody.row,
-      },
-    });
+    if (
+      reqBody.shelfId !== product.shelf_id ||
+      reqBody.row !== product.row ||
+      reqBody.column !== product.column
+    ) {
+      ShelfService.verifyCanPutProduct(
+        reqBody.shelf,
+        reqBody.row,
+        reqBody.column
+      );
 
-    return updatedProduct;
+      return prisma.$transaction(async (tx) => {
+        const updatedProduct = await tx.product.update({
+          where: { id },
+          data: {
+            name: reqBody.name,
+            description: reqBody.description,
+            type: reqBody.type,
+            lote_type: reqBody.loteType,
+            shelf: reqBody.shelf,
+            weight: reqBody.weight,
+            lote_amount: reqBody.loteAmount,
+            quantity: reqBody.quantity,
+            validity: reqBody.validity,
+            column: reqBody.column,
+            row: reqBody.row,
+          },
+        });
+
+        await ShelfService.updateShelfFullStatus(product.shelf_id, tx);
+        await ShelfService.updateShelfFullStatus(updatedProduct.shelf_id, tx);
+
+        return updatedProduct;
+      });
+    } else {
+      return await prisma.product.update({
+        where: { id },
+        data: {
+          name: reqBody.name,
+          description: reqBody.description,
+          type: reqBody.type,
+          lote_type: reqBody.loteType,
+          shelf: reqBody.shelf,
+          weight: reqBody.weight,
+          lote_amount: reqBody.loteAmount,
+          quantity: reqBody.quantity,
+          validity: reqBody.validity,
+          column: reqBody.column,
+          row: reqBody.row,
+        },
+      });
+    }
   }
 
   async deleteProduct(userId, id) {
