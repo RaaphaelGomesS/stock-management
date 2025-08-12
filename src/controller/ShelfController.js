@@ -3,7 +3,7 @@ import ShelfService from "../service/ShelfService.js";
 class ShelfController {
   async getAllShelvesInStock(req, res, next) {
     try {
-      const stockId = req.params.id;
+      const stockId = parseInt(req.params.id);
 
       const shelves = await ShelfService.getAllShelves(req.userId, stockId);
 
@@ -36,7 +36,7 @@ class ShelfController {
 
   async updateShelf(req, res, next) {
     try {
-      const id = req.params.id;
+      const id = parseInt(req.params.id);
       const updatedShelf = await ShelfService.updateShelf(id, req.body);
 
       res.status(200).json(updatedShelf);
@@ -47,7 +47,8 @@ class ShelfController {
 
   async deleteShelf(req, res, next) {
     try {
-      const id = req.params.id;
+      const id = parseInt(req.params.id);
+
       await ShelfService.deleteShelf(id);
 
       res.status(200).json({ message: `Estante:${id}, deletado com sucesso!` });
@@ -58,7 +59,8 @@ class ShelfController {
 
   async getShelfLayout(req, res, next) {
     try {
-      const id = req.params.id;
+      const id = parseInt(req.params.id);
+      
       const layout = await ShelfService.createShelfLayout(id);
 
       res.status(200).json(layout);

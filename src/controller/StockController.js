@@ -47,10 +47,9 @@ class StockController {
 
   async deleteStock(req, res, next) {
     try {
-      const userId = req.userId;
       const id = parseInt(req.params.id);
 
-      await StockService.deleteStock(id, userId);
+      await StockService.deleteStock(id, req.userId);
 
       res.status(200).json({ message: `Estoque: ${id}, deletado com sucesso!` });
     } catch (error) {

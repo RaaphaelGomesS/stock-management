@@ -3,38 +3,43 @@ import { ShelfError } from "../error/Error.js";
 import Validation from "../utils/Validation.js";
 
 class ShelfService {
-  async createShelf(data) {
-    Validation.validateShelfData(data);
+  async createShelf(reqBody) {
+    Validation.validateShelfData(reqBody);
 
     const shelf = await prisma.shelf.create({
       data: {
-        stock_id: data.stock_id,
-        columns: data.columns,
-        rows: data.rows,
-        destination: data.destination,
-        restriction: data.restriction,
+        columns: reqBody.columns,
+        rows: reqBody.rows,
+        destination: reqBody.destination,
+        restriction: reqBody.restriction,
         full: false,
-        user_id: data.user_id,
+        stock: {
+          connect: {
+            id: reqBody.stockId,
+          },
+        },
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
 
     return shelf;
   }
 
-  async updateShelf(id, data) {
+  async updateShelf(id, reqBody) {
     await this.findById(id);
-    Validation.validateShelfData(data);
+    Validation.validateShelfData(reqBody);
 
     return await prisma.shelf.update({
-      where: { id: Number(id) },
+      where: { id },
       data: {
-        stock_id: data.stock_id,
-        columns: data.columns,
-        rows: data.rows,
-        destination: data.destination,
-        restriction: data.restriction,
-        full: data.full,
-        user_id: data.user_id,
+        columns: reqBody.columns,
+        rows: reqBody.rows,
+        destination: reqBody.destination,
+        restriction: reqBody.restriction,
       },
     });
   }
@@ -47,17 +52,24 @@ class ShelfService {
     });
   }
 
-  async getAllShelves(userId) {
-    return prisma.shelf.findMany({
+  async getAllShelves(userId, stockId) {
+    const shelves = prisma.shelf.findMany({
       where: {
         user_id: userId,
+        stock_id: stockId,
       },
     });
+
+    if (shelves.length === 0) {
+      throw new ShelfError(`Nenhuma prateleira encontrada para o estoque: ${stockId}`, 404);
+    }
+
+    return shelves;
   }
 
-  async createShelfLayout(shelfId) {
+  async createShelfLayout(id) {
     const shelfWithProducts = await prisma.shelf.findUnique({
-      where: { id: shelfId },
+      where: { id },
       include: {
         product: {
           select: {
@@ -72,7 +84,7 @@ class ShelfService {
     });
 
     if (!shelfWithProducts) {
-      throw new ShelfError(`Prateleira com ID ${shelfId} não encontrada.`, 404);
+      throw new ShelfError(`Prateleira com ID ${id} não encontrada.`, 404);
     }
 
     const { rows, columns, product: products } = shelfWithProducts;
@@ -91,7 +103,7 @@ class ShelfService {
 
   async findById(id) {
     const shelf = await prisma.shelf.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
 
     if (!shelf) {
@@ -101,9 +113,9 @@ class ShelfService {
     return shelf;
   }
 
-  async verifyCanPutProduct(shelfId, row, collumn) {
+  async verifyCanPutProduct(id, row, collumn) {
     const shelf = await prisma.shelf.findUnique({
-      where: { id: Number(shelfId) },
+      where: { id },
       include: {
         product: {
           where: {
@@ -115,7 +127,7 @@ class ShelfService {
     });
 
     if (shelf.full) {
-      throw new ShelfError(`A prateleira ${shelfId} está cheia, não pode ser adicionado outro produto.`, 400);
+      throw new ShelfError(`A prateleira ${id} está cheia, não pode ser adicionado outro produto.`, 400);
     }
 
     if (shelf.product.length > 0) {

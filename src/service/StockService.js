@@ -2,17 +2,20 @@ import prisma from "../../prisma/prismaClient.js";
 import { StockError } from "../error/Error.js";
 
 class StockService {
-  async createStock(data, userId) {
-    await this.verifyAlreadyExist(data.name);
+  async createStock(reqBody, userId) {
+    await this.verifyAlreadyExist(reqBody.name, userId);
 
-    const stock = await prisma.stock.create({
+    return await prisma.stock.create({
       data: {
-        name: data.name,
-        description: data.description,
-        user_id: userId,
+        name: reqBody.name,
+        description: reqBody.description,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
-    return stock;
   }
 
   async getAllStocks(userId) {
@@ -27,15 +30,14 @@ class StockService {
     return stocks;
   }
 
-  async updateStock(id, userId, { ...data }) {
+  async updateStock(id, userId, reqBody) {
     await this.getStockById(id, userId);
 
     const updatedStock = await prisma.stock.update({
       where: { id },
       data: {
-        name: data.name,
-        description: data.description,
-        user_id: userId,
+        name: reqBody.name,
+        description: reqBody.description,
       },
     });
     return updatedStock;
@@ -51,23 +53,19 @@ class StockService {
 
   async getStockById(id, userId) {
     const stock = await prisma.stock.findFirst({
-      where: { id },
+      where: { id, user_id: userId },
     });
 
     if (!stock) {
       throw new StockError("Estoque não encontrado!", 404);
     }
 
-    if (stock.user_id != userId) {
-      throw new StockError("Não possui permissão para acessar o estoque!", 403);
-    }
-
     return stock;
   }
 
-  async verifyAlreadyExist(name) {
+  async verifyAlreadyExist(name, userId) {
     const stock = await prisma.stock.findFirst({
-      where: { name },
+      where: { name, user_id: userId },
     });
 
     if (stock) {

@@ -10,7 +10,7 @@ class ProductService {
 
     await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
 
-    ShelfService.verifyCanPutProduct(reqBody.shelf, reqBody.row, reqBody.column);
+    ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
 
     try {
       const newProduct = await prisma.$transaction(async (tx) => {
@@ -28,13 +28,17 @@ class ProductService {
             description: template.description,
             type: template.type,
             lote_type: template.loteType,
-            shelf: reqBody.shelf,
             weight: reqBody.weight,
             lote_amount: reqBody.loteAmount,
             quantity: reqBody.quantity,
             validity: reqBody.validity,
             column: reqBody.column,
             row: reqBody.row,
+            shelf: {
+              connect: {
+                id: reqBody.shelf,
+              },
+            },
             product_template: {
               connect: {
                 ean: template.ean,
@@ -68,8 +72,8 @@ class ProductService {
       throw new UserError("Não possui permissão para alterar esse produto!", 401);
     }
 
-    if (reqBody.shelfId !== product.shelf_id || reqBody.row !== product.row || reqBody.column !== product.column) {
-      ShelfService.verifyCanPutProduct(reqBody.shelf, reqBody.row, reqBody.column);
+    if (parseInt(reqBody.shelfId) !== product.shelf_id || reqBody.row !== product.row || reqBody.column !== product.column) {
+      ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
 
       return prisma.$transaction(async (tx) => {
         const updatedProduct = await tx.product.update({
@@ -79,13 +83,17 @@ class ProductService {
             description: reqBody.description,
             type: reqBody.type,
             lote_type: reqBody.loteType,
-            shelf: reqBody.shelf,
             weight: reqBody.weight,
             lote_amount: reqBody.loteAmount,
             quantity: reqBody.quantity,
             validity: reqBody.validity,
             column: reqBody.column,
             row: reqBody.row,
+            shelf: {
+              connect: {
+                id: reqBody.shelf,
+              },
+            },
           },
         });
 
@@ -102,13 +110,10 @@ class ProductService {
           description: reqBody.description,
           type: reqBody.type,
           lote_type: reqBody.loteType,
-          shelf: reqBody.shelf,
           weight: reqBody.weight,
           lote_amount: reqBody.loteAmount,
           quantity: reqBody.quantity,
-          validity: reqBody.validity,
-          column: reqBody.column,
-          row: reqBody.row,
+          validity: reqBody.validity
         },
       });
     }
@@ -210,7 +215,7 @@ class ProductService {
   }
 
   async searchTemplateByName(search) {
-        const templates = prisma.productTemplate.findMany({
+    const templates = prisma.productTemplate.findMany({
       where: {
         name: {
           contains: search,
