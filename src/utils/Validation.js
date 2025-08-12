@@ -1,5 +1,5 @@
 import { UserError } from "../error/Error.js";
-import { product_type, product_lote_type } from "@prisma/client";
+import { type, lote_type } from "@prisma/client";
 
 class Validation {
   validatePasswordAndEmail(email, password) {
@@ -23,12 +23,12 @@ class Validation {
     }
   }
 
-  validateTypes(reqBody, defaultType = product_type.GENERICO, defaultLotType = product_lote_type.UNIDADE) {
+  validateTypes(reqBody, defaultType = type.GENERICO, defaultLotType = lote_type.UNIDADE) {
     const type = reqBody.type;
     const loteType = reqBody.loteType;
 
-    const validTypes = Object.values(product_type);
-    const validLotetypes = Object.values(product_lote_type);
+    const validTypes = Object.values(type);
+    const validLotetypes = Object.values(lote_type);
 
     if (!type || !validTypes.includes(type)) {
       reqBody.type = defaultType;
