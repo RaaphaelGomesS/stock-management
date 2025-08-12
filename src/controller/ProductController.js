@@ -12,9 +12,9 @@ class ProductController {
     }
   }
 
-  async findTemplateId(req, res, next) {
+  async findTemplateEan(req, res, next) {
     try {
-      const ean = parseInt(req.params.id);
+      const ean = parseInt(req.params.ean);
       const template = await TemplateService.findTemplateByEan(ean);
 
       res.status(200).json(template);
@@ -51,6 +51,41 @@ class ProductController {
       const products = await ProductService.productHistorical(req.userId);
 
       res.status(200).json(products);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async searchProductByName(req, res, next) {
+    try {
+      const search = req.query.q;
+
+      const products = await ProductService.searchProductByName(req.userId, search);
+
+      res.status(200).json(products);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async searchTemplateByName(req, res, next) {
+    try {
+      const search = req.query.q;
+
+      const products = await ProductService.searchTemplateByName(req.userId, search);
+
+      res.status(200).json(products);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async searchProductByEanTemplate(req, res, next) {
+    try {
+      const ean = parseInt(req.params.ean);
+      const template = await ProductService.searchProductByEanTemplate(req.userId, ean);
+
+      res.status(200).json(template);
     } catch (error) {
       next(error);
     }
