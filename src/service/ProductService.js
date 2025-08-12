@@ -5,7 +5,7 @@ import TemplateService from "./TemplateService.js";
 import ShelfService from "./ShelfService.js";
 
 class ProductService {
-  async registerProduct(userId, reqBody) {
+  async registerProduct(userId, reqBody, file) {
     Validation.validateTypes(reqBody);
 
     await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
@@ -14,12 +14,15 @@ class ProductService {
 
     try {
       const newProduct = await prisma.$transaction(async (tx) => {
+
+        const imageUrl = file ? `/uploads/${file.filename}` : null;
+
         let template = await prisma.productTemplate.findUnique({
           where: { ean: reqBody.ean },
         });
 
         if (!template) {
-          template = await TemplateService.createProductTemplate(reqBody, tx);
+          template = await TemplateService.createProductTemplate(reqBody, imageUrl, tx);
         }
 
         const createProduct = await tx.product.create({
@@ -34,6 +37,7 @@ class ProductService {
             validity: reqBody.validity,
             column: reqBody.column,
             row: reqBody.row,
+            image: imageUrl,
             shelf: {
               connect: {
                 id: reqBody.shelf,

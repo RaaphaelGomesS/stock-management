@@ -1,7 +1,7 @@
 import prisma from "../../prisma/prismaClient.js";
 
 class ProductTemplate {
-  async createProductTemplate(reqBody, prismaTx) {
+  async createProductTemplate(reqBody, imageUrl, prismaTx) {
     const db = prismaTx || prisma;
 
     return await db.productTemplate.create({
@@ -11,6 +11,7 @@ class ProductTemplate {
         description: reqBody.description,
         type: reqBody.type,
         lote_type: reqBody.loteType,
+        image: imageUrl
       },
     });
   }

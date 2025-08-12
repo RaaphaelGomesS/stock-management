@@ -4,7 +4,7 @@ import TemplateService from "../service/TemplateService.js";
 class ProductController {
   async registerProduct(req, res, next) {
     try {
-      const product = await ProductService.registerProduct(req.userId, req.body);
+      const product = await ProductService.registerProduct(req.userId, req.body, req.file);
 
       res.status(201).json(product);
     } catch (error) {
