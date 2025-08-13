@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import "dotenv/config";
 import UserRouter from "./router/UserRouter.js";
 import StockRouter from "./router/StockRouter.js";
@@ -14,6 +15,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 app.use(cors());
+app.use(helmet());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
