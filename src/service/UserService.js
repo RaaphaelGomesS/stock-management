@@ -12,15 +12,13 @@ class UserService {
 
     const encryptPass = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
+    return await prisma.user.create({
       data: {
         name: name,
         email: email,
         password: encryptPass,
       },
     });
-
-    return user;
   }
 
   async updateUser(id, name, email, password) {

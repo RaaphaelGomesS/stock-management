@@ -26,7 +26,7 @@ class ProductController {
   async findProductId(req, res, next) {
     try {
       const productId = parseInt(req.params.id);
-      const product = await ProductService.findProductById(req.userId, productId);
+      const product = await ProductService.findProductById(productId, req.userId);
 
       res.status(200).json(product);
     } catch (error) {

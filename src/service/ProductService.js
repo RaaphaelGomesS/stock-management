@@ -1,6 +1,6 @@
 import prisma from "../../prisma/prismaClient.js";
 import Validation from "../utils/Validation.js";
-import { ProductError, UserError } from "../error/Error.js";
+import { ProductError } from "../error/Error.js";
 import TemplateService from "./TemplateService.js";
 import ShelfService from "./ShelfService.js";
 
@@ -14,7 +14,6 @@ class ProductService {
 
     try {
       const newProduct = await prisma.$transaction(async (tx) => {
-
         const imageUrl = file ? `/uploads/${file.filename}` : null;
 
         let template = await prisma.productTemplate.findUnique({
@@ -70,13 +69,13 @@ class ProductService {
   async updateProduct(id, userId, reqBody) {
     Validation.validateTypes(reqBody);
 
-    const product = await this.findProductById(id);
+    const product = await this.findProductById(id, userId);
 
-    if (product.user_id != userId) {
-      throw new UserError("Não possui permissão para alterar esse produto!", 401);
-    }
-
-    if (parseInt(reqBody.shelfId) !== product.shelf_id || reqBody.row !== product.row || reqBody.column !== product.column) {
+    if (
+      parseInt(reqBody.shelfId) !== product.shelf_id ||
+      reqBody.row !== product.row ||
+      reqBody.column !== product.column
+    ) {
       ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
 
       return prisma.$transaction(async (tx) => {
@@ -117,7 +116,7 @@ class ProductService {
           weight: reqBody.weight,
           lote_amount: reqBody.loteAmount,
           quantity: reqBody.quantity,
-          validity: reqBody.validity
+          validity: reqBody.validity,
         },
       });
     }
@@ -126,11 +125,7 @@ class ProductService {
   async adjustQuantity(userId, productId, reqBody) {
     Validation.validateTypes(reqBody);
 
-    const product = await this.findProductById(productId);
-
-    if (product.user_id != userId) {
-      throw new UserError("Não possui permissão para alterar esse produto!", 401);
-    }
+    const product = await this.findProductById(productId, userId);
 
     const quantityWithAdjust = product.quantity + parseInt(reqBody.adjustment);
 
@@ -145,11 +140,7 @@ class ProductService {
   }
 
   async deleteProduct(userId, id) {
-    const product = await this.findProductById(id);
-
-    if (product.user_id != userId) {
-      throw new UserError("Não possui permissão para alterar esse produto!", 401);
-    }
+    const product = await this.findProductById(id, userId);
 
     return prisma.$transaction(async (tx) => {
       await prisma.product.delete({
@@ -160,12 +151,12 @@ class ProductService {
     });
   }
 
-  async findProductById(id) {
-    const product = await prisma.product.findUnique({
-      where: { id },
+  async findProductById(id, userId) {
+    const product = await prisma.product.findFirst({
+      where: { id, user_id: userId },
     });
     if (!product) {
-      throw new ProductError("Produto não encontrado!", 404);
+      throw new ProductError("Produto não encontrado ou não possui permissão para acessá-lo.", 404);
     }
     return product;
   }

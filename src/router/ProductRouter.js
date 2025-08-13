@@ -1,20 +1,20 @@
 import express from "express";
 import ProductController from "../controller/ProductController.js";
-import AuthService from "../service/AuthService.js";
+import {authentication} from "../middlewares/AuthMiddleware.js";
 import upload from "../config/multerConfig.js";
 
 const router = express.Router();
 
-router.post("/:id/adjust", AuthService.authentication, ProductController.adjustQuantity);
-router.get("/history", AuthService.authentication, ProductController.recentChangedProducts);
-router.get("/shelf/:id", AuthService.authentication, ProductController.findAllProductsInShelf);
-router.get("/search", AuthService.authentication, ProductController.searchProductByName);
-router.get("/:ean", AuthService.authentication, ProductController.searchProductByEanTemplate);
-router.get("/template/search", AuthService.authentication, ProductController.searchTemplateByName);
-router.get("/template/:ean", AuthService.authentication, ProductController.findTemplateEan);
-router.post("/", AuthService.authentication, upload.single('productImage'), ProductController.registerProduct);
-router.get("/:id", AuthService.authentication, ProductController.findProductId);
-router.put("/:id", AuthService.authentication, ProductController.updateProduct);
-router.delete("/:id", AuthService.authentication, ProductController.deleteProduct);
+router.post("/:id/adjust", authentication, ProductController.adjustQuantity);
+router.get("/history", authentication, ProductController.recentChangedProducts);
+router.get("/shelf/:id", authentication, ProductController.findAllProductsInShelf);
+router.get("/search", authentication, ProductController.searchProductByName);
+router.get("/:ean", authentication, ProductController.searchProductByEanTemplate);
+router.get("/template/search", authentication, ProductController.searchTemplateByName);
+router.get("/template/:ean", authentication, ProductController.findTemplateEan);
+router.post("/", authentication, upload.single('productImage'), ProductController.registerProduct);
+router.get("/:id", authentication, ProductController.findProductId);
+router.put("/:id", authentication, ProductController.updateProduct);
+router.delete("/:id", authentication, ProductController.deleteProduct);
 
 export default router;
