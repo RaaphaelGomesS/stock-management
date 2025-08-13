@@ -15,8 +15,9 @@ class ShelfController {
 
   async getById(req, res, next) {
     try {
-      const id = req.params.id;
-      const shelf = await ShelfService.findById(id);
+      const shelfId = parseInt(req.params.id);
+
+      const shelf = await ShelfService.findById(req.userId, shelfId);
 
       res.status(200).json(shelf);
     } catch (error) {
@@ -26,7 +27,7 @@ class ShelfController {
 
   async createShelf(req, res, next) {
     try {
-      const newShelf = await ShelfService.createShelf(req.body);
+      const newShelf = await ShelfService.createShelf(req.body, req.userId);
 
       res.status(201).json(newShelf);
     } catch (error) {
@@ -36,8 +37,8 @@ class ShelfController {
 
   async updateShelf(req, res, next) {
     try {
-      const id = parseInt(req.params.id);
-      const updatedShelf = await ShelfService.updateShelf(id, req.body);
+      const shelfId = parseInt(req.params.id);
+      const updatedShelf = await ShelfService.updateShelf(shelfId, req.userId, req.body);
 
       res.status(200).json(updatedShelf);
     } catch (error) {
@@ -47,9 +48,9 @@ class ShelfController {
 
   async deleteShelf(req, res, next) {
     try {
-      const id = parseInt(req.params.id);
+      const shelfId = parseInt(req.params.id);
 
-      await ShelfService.deleteShelf(id);
+      await ShelfService.deleteShelf(shelfId, req.userId);
 
       res.status(200).json({ message: `Estante:${id}, deletado com sucesso!` });
     } catch (error) {
@@ -59,9 +60,9 @@ class ShelfController {
 
   async getShelfLayout(req, res, next) {
     try {
-      const id = parseInt(req.params.id);
-      
-      const layout = await ShelfService.createShelfLayout(id);
+      const shelfId = parseInt(req.params.id);
+
+      const layout = await ShelfService.createShelfLayout(shelfId, req.userId);
 
       res.status(200).json(layout);
     } catch (error) {

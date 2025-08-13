@@ -1,5 +1,4 @@
 import UserService from "../service/UserService.js";
-import AuthService from "../service/AuthService.js";
 
 class UserController {
   async registerUser(req, res, next) {
@@ -28,8 +27,6 @@ class UserController {
       const userId = parseInt(req.params.id);
       const { name, email, password } = req.body;
 
-      AuthService.verifyHavePermission(req.userId, userId);
-
       const user = await UserService.updateUser(userId, name, email, password);
       res.status(200).json(user);
     } catch (error) {
@@ -41,7 +38,6 @@ class UserController {
     try {
       const userId = parseInt(req.params.id);
 
-      AuthService.verifyHavePermission(req.userId, userId);
       await UserService.deleteUser(userId);
 
       res.status(200).json({ message: `Usuário:${userId}, deletado com sucesso!` });

@@ -3,7 +3,7 @@ import { ShelfError } from "../error/Error.js";
 import Validation from "../utils/Validation.js";
 
 class ShelfService {
-  async createShelf(reqBody) {
+  async createShelf(reqBody, userId) {
     Validation.validateShelfData(reqBody);
 
     const shelf = await prisma.shelf.create({
@@ -29,8 +29,8 @@ class ShelfService {
     return shelf;
   }
 
-  async updateShelf(id, reqBody) {
-    await this.findById(id);
+  async updateShelf(id, userId, reqBody) {
+    await this.findById(id, userId);
     Validation.validateShelfData(reqBody);
 
     return await prisma.shelf.update({
@@ -61,15 +61,15 @@ class ShelfService {
     });
 
     if (shelves.length === 0) {
-      throw new ShelfError(`Nenhuma prateleira encontrada para o estoque: ${stockId}`, 404);
+      throw new ShelfError(`Nenhuma prateleira encontrada para o estoque: ${stockId} ou não possui permissão.`, 404);
     }
 
     return shelves;
   }
 
-  async createShelfLayout(id) {
-    const shelfWithProducts = await prisma.shelf.findUnique({
-      where: { id },
+  async createShelfLayout(id, userId) {
+    const shelfWithProducts = await prisma.shelf.findFirst({
+      where: { id, user_id: userId },
       include: {
         product: {
           select: {
@@ -84,7 +84,7 @@ class ShelfService {
     });
 
     if (!shelfWithProducts) {
-      throw new ShelfError(`Prateleira com ID ${id} não encontrada.`, 404);
+      throw new ShelfError(`Prateleira com ID ${id} não encontrada ou não possui permissão.`, 404);
     }
 
     const { rows, columns, product: products } = shelfWithProducts;
@@ -101,13 +101,13 @@ class ShelfService {
     return layoutMatriz;
   }
 
-  async findById(id) {
-    const shelf = await prisma.shelf.findUnique({
-      where: { id },
+  async findById(id, userId) {
+    const shelf = await prisma.shelf.findFirst({
+      where: { id, user_id: userId },
     });
 
     if (!shelf) {
-      throw new ShelfError("Prateleira não encontrada!", 404);
+      throw new ShelfError("Prateleira não encontrada ou não possui permissão.", 404);
     }
 
     return shelf;

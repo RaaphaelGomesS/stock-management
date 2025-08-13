@@ -1,13 +1,13 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
 import "dotenv/config";
+import cors from "cors";
+import path from "path";
+import helmet from "helmet";
+import express from "express";
+import { fileURLToPath } from 'url';
 import UserRouter from "./router/UserRouter.js";
 import StockRouter from "./router/StockRouter.js";
 import ShelfRouter from "./router/ShelfRouter.js";
 import ProductRouter from "./router/ProductRouter.js";
-import path from "path";
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
