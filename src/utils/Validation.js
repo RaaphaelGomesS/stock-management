@@ -24,13 +24,13 @@ class Validation {
   }
 
   validateTypes(reqBody, defaultType = type.GENERICO, defaultLotType = lote_type.UNIDADE) {
-    const type = reqBody.type;
+    const typeReq = reqBody.type;
     const loteType = reqBody.loteType;
 
     const validTypes = Object.values(type);
     const validLotetypes = Object.values(lote_type);
 
-    if (!type || !validTypes.includes(type)) {
+    if (!typeReq || !validTypes.includes(type)) {
       reqBody.type = defaultType;
     }
 
@@ -40,7 +40,7 @@ class Validation {
   }
 
   validateShelfData(data) {
-    if (!data.stock_id || !data.columns || !data.rows || !data.destination || !data.user_id) {
+    if (!data.stockId || !data.columns || !data.rows || !data.destination) {
       throw new ShelfError("Campos obrigatórios da prateleira estão faltando!", 400);
     }
 

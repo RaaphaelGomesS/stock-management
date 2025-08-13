@@ -52,7 +52,7 @@ class ShelfController {
 
       await ShelfService.deleteShelf(shelfId, req.userId);
 
-      res.status(200).json({ message: `Estante:${id}, deletado com sucesso!` });
+      res.status(200).json({ message: `Estante:${shelfId}, deletado com sucesso!` });
     } catch (error) {
       next(error);
     }

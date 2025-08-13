@@ -1,10 +1,14 @@
 import prisma from "../../prisma/prismaClient.js";
 import { ShelfError } from "../error/Error.js";
 import Validation from "../utils/Validation.js";
+import StockService from "../service/StockService.js";
 
 class ShelfService {
   async createShelf(reqBody, userId) {
     Validation.validateShelfData(reqBody);
+    Validation.validateTypes(reqBody);
+
+    await StockService.getStockById(reqBody.stockId, userId);
 
     const shelf = await prisma.shelf.create({
       data: {
@@ -12,17 +16,13 @@ class ShelfService {
         rows: reqBody.rows,
         destination: reqBody.destination,
         restriction: reqBody.restriction,
+        user_id: userId,
         full: false,
         stock: {
           connect: {
             id: reqBody.stockId,
           },
-        },
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
+        }
       },
     });
 
@@ -44,16 +44,16 @@ class ShelfService {
     });
   }
 
-  async deleteShelf(id) {
-    await this.findById(id);
+  async deleteShelf(id, userId) {
+    await this.findById(id, userId);
 
     await prisma.shelf.delete({
-      where: { id: Number(id) },
+      where: { id },
     });
   }
 
   async getAllShelves(userId, stockId) {
-    const shelves = prisma.shelf.findMany({
+    const shelves = await prisma.shelf.findMany({
       where: {
         user_id: userId,
         stock_id: stockId,

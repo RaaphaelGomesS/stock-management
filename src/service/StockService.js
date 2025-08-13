@@ -57,7 +57,7 @@ class StockService {
     });
 
     if (!stock) {
-      throw new StockError("Estoque não encontrado!", 404);
+      throw new StockError("Estoque não encontrado ou não possui permissão.", 404);
     }
 
     return stock;
