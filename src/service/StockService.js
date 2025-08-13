@@ -69,7 +69,7 @@ class StockService {
     });
 
     if (stock) {
-      throw new StockError("Estoque não encontrado!", 404);
+      throw new StockError("Já existe um estoque com esse nome.", 400);
     }
   }
 }
