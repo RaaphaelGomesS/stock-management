@@ -22,7 +22,7 @@ class ShelfService {
           connect: {
             id: reqBody.stockId,
           },
-        }
+        },
       },
     });
 
@@ -125,6 +125,10 @@ class ShelfService {
         },
       },
     });
+
+    if (!shelf) {
+      throw new ShelfError("A prateleira não foi encontrada.", 404);
+    }
 
     if (shelf.full) {
       throw new ShelfError(`A prateleira ${id} está cheia, não pode ser adicionado outro produto.`, 400);

@@ -10,13 +10,13 @@ class ProductService {
 
     await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
 
-    ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
+    await ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
 
     try {
       const newProduct = await prisma.$transaction(async (tx) => {
         const imageUrl = file ? `/uploads/${file.filename}` : null;
 
-        let template = await prisma.productTemplate.findUnique({
+        let template = await tx.productTemplate.findUnique({
           where: { ean: reqBody.ean },
         });
 
@@ -37,19 +37,15 @@ class ProductService {
             column: reqBody.column,
             row: reqBody.row,
             image: imageUrl,
+            user_id: userId,
             shelf: {
               connect: {
-                id: reqBody.shelf,
+                id: reqBody.shelfId,
               },
             },
             product_template: {
               connect: {
                 ean: template.ean,
-              },
-            },
-            user: {
-              connect: {
-                id: userId,
               },
             },
           },
@@ -94,7 +90,7 @@ class ProductService {
             row: reqBody.row,
             shelf: {
               connect: {
-                id: reqBody.shelf,
+                id: reqBody.shelfId,
               },
             },
           },

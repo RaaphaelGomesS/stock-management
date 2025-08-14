@@ -11,7 +11,8 @@ class ProductTemplate {
         description: reqBody.description,
         type: reqBody.type,
         lote_type: reqBody.loteType,
-        image: imageUrl
+        lote_amount: reqBody.loteAmount,
+        image: imageUrl,
       },
     });
   }
