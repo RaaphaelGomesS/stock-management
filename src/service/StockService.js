@@ -23,7 +23,7 @@ class StockService {
       where: { user_id: userId },
     });
 
-    if (!stocks) {
+    if (stocks.length === 0) {
       throw new StockError("Nenhum estoque encontrado!", 404);
     }
 

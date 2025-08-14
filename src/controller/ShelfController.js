@@ -17,7 +17,7 @@ class ShelfController {
     try {
       const shelfId = parseInt(req.params.id);
 
-      const shelf = await ShelfService.findById(req.userId, shelfId);
+      const shelf = await ShelfService.findById(shelfId, req.userId);
 
       res.status(200).json(shelf);
     } catch (error) {
