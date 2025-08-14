@@ -8,7 +8,7 @@ class ProductService {
   async registerProduct(userId, reqBody, file) {
     Validation.validateTypes(reqBody);
 
-    await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type);
+    await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type, reqBody.ean);
 
     await ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
 
@@ -58,6 +58,9 @@ class ProductService {
 
       return newProduct;
     } catch (error) {
+      console.error("--- ERRO OCORREU DENTRO DA TRANSAÇÃO ---");
+      console.error("Mensagem do Erro Original:", error.message);
+
       throw new ProductError(`Falha ao salvar o produto e atualizar a prateleira`, 400);
     }
   }
@@ -72,35 +75,42 @@ class ProductService {
       reqBody.row !== product.row ||
       reqBody.column !== product.column
     ) {
-      ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
+      await ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
 
-      return prisma.$transaction(async (tx) => {
-        const updatedProduct = await tx.product.update({
-          where: { id },
-          data: {
-            name: reqBody.name,
-            description: reqBody.description,
-            type: reqBody.type,
-            lote_type: reqBody.loteType,
-            weight: reqBody.weight,
-            lote_amount: reqBody.loteAmount,
-            quantity: reqBody.quantity,
-            validity: reqBody.validity,
-            column: reqBody.column,
-            row: reqBody.row,
-            shelf: {
-              connect: {
-                id: reqBody.shelfId,
+      try {
+        return prisma.$transaction(async (tx) => {
+          const updatedProduct = await tx.product.update({
+            where: { id },
+            data: {
+              name: reqBody.name,
+              description: reqBody.description,
+              type: reqBody.type,
+              lote_type: reqBody.loteType,
+              weight: reqBody.weight,
+              lote_amount: reqBody.loteAmount,
+              quantity: reqBody.quantity,
+              validity: reqBody.validity,
+              column: reqBody.column,
+              row: reqBody.row,
+              shelf: {
+                connect: {
+                  id: reqBody.shelfId,
+                },
               },
             },
-          },
+          });
+
+          await ShelfService.updateShelfFullStatus(product.shelf_id, tx);
+          await ShelfService.updateShelfFullStatus(updatedProduct.shelf_id, tx);
+
+          return updatedProduct;
         });
+      } catch (error) {
+        console.error("--- ERRO OCORREU DENTRO DA TRANSAÇÃO ---");
+        console.error("Mensagem do Erro Original:", error.message);
 
-        await ShelfService.updateShelfFullStatus(product.shelf_id, tx);
-        await ShelfService.updateShelfFullStatus(updatedProduct.shelf_id, tx);
-
-        return updatedProduct;
-      });
+        throw new ProductError(`Falha ao atualizar o produto e a prateleira`, 400);
+      }
     } else {
       return await prisma.product.update({
         where: { id },
@@ -119,8 +129,6 @@ class ProductService {
   }
 
   async adjustQuantity(userId, productId, reqBody) {
-    Validation.validateTypes(reqBody);
-
     const product = await this.findProductById(productId, userId);
 
     const quantityWithAdjust = product.quantity + parseInt(reqBody.adjustment);
@@ -175,7 +183,7 @@ class ProductService {
     const products = await prisma.product.findMany({
       take: 5,
       where: {
-        userId: userId,
+        user_id: userId,
       },
       orderBy: {
         updated_date: "desc",
@@ -189,16 +197,17 @@ class ProductService {
     return products;
   }
 
-  async searchProductByName(search) {
-    const products = prisma.product.findMany({
+  async searchProductByName(userId, search) {
+    const products = await prisma.product.findMany({
       where: {
+        user_id: userId,
         name: {
           contains: search,
         },
       },
     });
 
-    if (products.length !== 0) {
+    if (products.length === 0) {
       throw new ProductError("Não foi encontrado nenhum produto.", 404);
     }
 
@@ -206,7 +215,7 @@ class ProductService {
   }
 
   async searchTemplateByName(search) {
-    const templates = prisma.productTemplate.findMany({
+    const templates = await prisma.productTemplate.findMany({
       where: {
         name: {
           contains: search,
@@ -214,7 +223,7 @@ class ProductService {
       },
     });
 
-    if (templates.length !== 0) {
+    if (templates.length === 0) {
       throw new ProductError("Não foi encontrado nenhuma template.", 404);
     }
 
@@ -222,23 +231,23 @@ class ProductService {
   }
 
   async searchProductByEanTemplate(userId, ean) {
-    const products = prisma.product.findMany({
+    const products = await prisma.product.findMany({
       where: {
         user_id: userId,
         template_id: ean,
       },
     });
 
-    if (products.length !== 0) {
+    if (products.length === 0) {
       throw new ProductError(`Não existe nenhum produto com o seguinte EAN: ${ean}`, 404);
     }
 
     return products;
   }
 
-  async verifyProductAlreadyExist(userId, name, type) {
+  async verifyProductAlreadyExist(userId, name, type, ean) {
     const product = await prisma.product.findFirst({
-      where: { user_id: userId, name: name, type: type },
+      where: { user_id: userId, name: name, type: type, template_id: ean },
     });
 
     if (product) {

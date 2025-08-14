@@ -130,6 +130,10 @@ class ShelfService {
       throw new ShelfError("A prateleira não foi encontrada.", 404);
     }
 
+    if (row > shelf.rows || collumn > shelf.columns) {
+      throw new ShelfError("A posição escolhida não é suportada pela prateleira.", 400);
+    }
+
     if (shelf.full) {
       throw new ShelfError(`A prateleira ${id} está cheia, não pode ser adicionado outro produto.`, 400);
     }

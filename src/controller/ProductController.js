@@ -72,7 +72,7 @@ class ProductController {
     try {
       const search = req.query.q;
 
-      const products = await ProductService.searchTemplateByName(req.userId, search);
+      const products = await ProductService.searchTemplateByName(search);
 
       res.status(200).json(products);
     } catch (error) {
@@ -105,7 +105,7 @@ class ProductController {
   async updateProduct(req, res, next) {
     try {
       const productId = parseInt(req.params.id);
-      const product = await ProductService.updateProduct(req.userId, productId, req.body);
+      const product = await ProductService.updateProduct(productId, req.userId, req.body);
 
       res.status(200).json(product);
     } catch (error) {

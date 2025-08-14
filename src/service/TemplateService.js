@@ -10,8 +10,8 @@ class ProductTemplate {
         name: reqBody.name,
         description: reqBody.description,
         type: reqBody.type,
-        lote_type: reqBody.loteType,
-        lote_amount: reqBody.loteAmount,
+        loteType: reqBody.loteType,
+        loteAmount: reqBody.loteAmount,
         image: imageUrl,
       },
     });

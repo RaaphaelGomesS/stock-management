@@ -9,7 +9,7 @@ router.post("/:id/adjust", authentication, ProductController.adjustQuantity);
 router.get("/history", authentication, ProductController.recentChangedProducts);
 router.get("/shelf/:id", authentication, ProductController.findAllProductsInShelf);
 router.get("/search", authentication, ProductController.searchProductByName);
-router.get("/:ean", authentication, ProductController.searchProductByEanTemplate);
+router.get("/ean/:ean", authentication, ProductController.searchProductByEanTemplate);
 router.get("/template/search", authentication, ProductController.searchTemplateByName);
 router.get("/template/:ean", authentication, ProductController.findTemplateEan);
 router.post("/", authentication, upload.single('productImage'), ProductController.registerProduct);
