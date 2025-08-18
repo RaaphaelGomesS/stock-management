@@ -168,21 +168,15 @@ class ProductService {
   }
 
   async findAllProductsInShelf(shelfId) {
-    const products = await prisma.product.findMany({
+    return await prisma.product.findMany({
       where: {
         shelf_id: shelfId,
       },
     });
-
-    if (products.length === 0) {
-      throw new ProductError(`Nenhum produto encontrado na prateleira ${shelfId}`, 404);
-    }
-
-    return products;
   }
 
   async productHistorical(userId) {
-    const products = await prisma.product.findMany({
+    return await prisma.product.findMany({
       take: 5,
       where: {
         user_id: userId,
@@ -191,16 +185,10 @@ class ProductService {
         updated_date: "desc",
       },
     });
-
-    if (products.length === 0) {
-      throw new ProductError(`Nenhum produto encontrado para o usuário ${userId}`, 404);
-    }
-
-    return products;
   }
 
   async searchProductByName(userId, search) {
-    const products = await prisma.product.findMany({
+    return await prisma.product.findMany({
       where: {
         user_id: userId,
         name: {
@@ -208,43 +196,25 @@ class ProductService {
         },
       },
     });
-
-    if (products.length === 0) {
-      throw new ProductError("Não foi encontrado nenhum produto.", 404);
-    }
-
-    return products;
   }
 
   async searchTemplateByName(search) {
-    const templates = await prisma.productTemplate.findMany({
+    return await prisma.productTemplate.findMany({
       where: {
         name: {
           contains: search,
         },
       },
     });
-
-    if (templates.length === 0) {
-      throw new ProductError("Não foi encontrado nenhuma template.", 404);
-    }
-
-    return templates;
   }
 
   async searchProductByEanTemplate(userId, ean) {
-    const products = await prisma.product.findMany({
+    return await prisma.product.findMany({
       where: {
         user_id: userId,
         template_id: ean,
       },
     });
-
-    if (products.length === 0) {
-      throw new ProductError(`Não existe nenhum produto com o seguinte EAN: ${ean}`, 404);
-    }
-
-    return products;
   }
 
   async verifyProductAlreadyExist(userId, name, type, ean) {

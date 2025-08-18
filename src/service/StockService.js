@@ -19,15 +19,9 @@ class StockService {
   }
 
   async getAllStocks(userId) {
-    const stocks = await prisma.stock.findMany({
+    return await prisma.stock.findMany({
       where: { user_id: userId },
     });
-
-    if (stocks.length === 0) {
-      throw new StockError("Nenhum estoque encontrado!", 404);
-    }
-
-    return stocks;
   }
 
   async updateStock(id, userId, validatedBody) {

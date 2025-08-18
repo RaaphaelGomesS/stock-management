@@ -51,18 +51,12 @@ class ShelfService {
   }
 
   async getAllShelves(userId, stockId) {
-    const shelves = await prisma.shelf.findMany({
+    return await prisma.shelf.findMany({
       where: {
         user_id: userId,
         stock_id: stockId,
       },
     });
-
-    if (shelves.length === 0) {
-      throw new ShelfError(`Nenhuma prateleira encontrada para o estoque: ${stockId} ou não possui permissão.`, 404);
-    }
-
-    return shelves;
   }
 
   async createShelfLayout(id, userId) {
