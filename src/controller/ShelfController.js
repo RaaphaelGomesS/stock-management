@@ -27,7 +27,7 @@ class ShelfController {
 
   async createShelf(req, res, next) {
     try {
-      const newShelf = await ShelfService.createShelf(req.body, req.userId);
+      const newShelf = await ShelfService.createShelf(req.validatedBody, req.userId);
 
       res.status(201).json(newShelf);
     } catch (error) {
@@ -38,7 +38,7 @@ class ShelfController {
   async updateShelf(req, res, next) {
     try {
       const shelfId = parseInt(req.params.id);
-      const updatedShelf = await ShelfService.updateShelf(shelfId, req.userId, req.body);
+      const updatedShelf = await ShelfService.updateShelf(shelfId, req.userId, req.validatedBody);
 
       res.status(200).json(updatedShelf);
     } catch (error) {
@@ -52,7 +52,7 @@ class ShelfController {
 
       await ShelfService.deleteShelf(shelfId, req.userId);
 
-      res.status(200).json({ message: `Estante:${shelfId}, deletado com sucesso!` });
+      res.status(204).json();
     } catch (error) {
       next(error);
     }

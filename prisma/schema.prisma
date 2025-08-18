@@ -16,7 +16,7 @@ model ProductTemplate {
   weight      Decimal?  @db.Decimal(5, 2)
   loteAmount  Int       @map("lote_amount")
   image       String?
-  product     product[] @ignore
+  product     product[]
 
   @@map("product_template")
 }
@@ -39,7 +39,7 @@ model product {
   updated_date     DateTime        @updatedAt
   image            String?
   user_id          Int
-  shelf            shelf           @relation(fields: [shelf_id], references: [id], map: "Product_shelf_id_fkey")
+  shelf            shelf           @relation(fields: [shelf_id], references: [id], onDelete: Cascade, map: "Product_shelf_id_fkey")
   product_template ProductTemplate @relation(fields: [template_id], references: [ean], map: "Product_template_id_fkey")
 
   @@index([shelf_id], map: "Product_shelf_id_fkey")
@@ -58,7 +58,7 @@ model shelf {
   updated_date DateTime  @updatedAt
   user_id      Int
   product      product[]
-  stock        stock     @relation(fields: [stock_id], references: [id], map: "Shelf_stock_id_fkey")
+  stock        stock     @relation(fields: [stock_id], references: [id], onDelete: Cascade, map: "Shelf_stock_id_fkey")
 
   @@index([stock_id], map: "Shelf_stock_id_fkey")
 }
@@ -69,7 +69,7 @@ model stock {
   name        String?
   description String?
   shelf       shelf[]
-  user        user    @relation(fields: [user_id], references: [id], map: "Stock_user_id_fkey")
+  user        user    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "Stock_user_id_fkey")
 
   @@index([user_id], map: "Stock_user_id_fkey")
 }

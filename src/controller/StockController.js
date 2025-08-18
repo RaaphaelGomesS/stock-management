@@ -3,7 +3,7 @@ import StockService from "../service/StockService.js";
 class StockController {
   async createStock(req, res, next) {
     try {
-      const stock = await StockService.createStock(req.body, req.userId);
+      const stock = await StockService.createStock(req.validatedBody, req.userId);
 
       res.status(201).json(stock);
     } catch (error) {
@@ -37,7 +37,7 @@ class StockController {
     try {
       const id = parseInt(req.params.id);
 
-      const updatedStock = await StockService.updateStock(id, req.userId, req.body);
+      const updatedStock = await StockService.updateStock(id, req.userId, req.validatedBody);
 
       res.status(200).json(updatedStock);
     } catch (error) {
@@ -51,7 +51,7 @@ class StockController {
 
       await StockService.deleteStock(id, req.userId);
 
-      res.status(200).json({ message: `Estoque: ${id}, deletado com sucesso!` });
+      res.status(204);
     } catch (error) {
       next(error);
     }

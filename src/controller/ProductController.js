@@ -4,7 +4,7 @@ import TemplateService from "../service/TemplateService.js";
 class ProductController {
   async registerProduct(req, res, next) {
     try {
-      const product = await ProductService.registerProduct(req.userId, req.body, req.file);
+      const product = await ProductService.registerProduct(req.userId, req.validatedBody, req.validatedFile);
 
       res.status(201).json(product);
     } catch (error) {
@@ -94,7 +94,7 @@ class ProductController {
   async adjustQuantity(req, res, next) {
     try {
       const productId = parseInt(req.params.id);
-      const product = await ProductService.adjustQuantity(req.userId, productId, req.body);
+      const product = await ProductService.adjustQuantity(req.userId, productId, req.validatedBody);
 
       res.status(200).json(product);
     } catch (error) {
@@ -105,7 +105,7 @@ class ProductController {
   async updateProduct(req, res, next) {
     try {
       const productId = parseInt(req.params.id);
-      const product = await ProductService.updateProduct(productId, req.userId, req.body);
+      const product = await ProductService.updateProduct(productId, req.userId, req.validatedBody, req.validatedFile);
 
       res.status(200).json(product);
     } catch (error) {
@@ -119,7 +119,7 @@ class ProductController {
 
       await ProductService.deleteProduct(req.userId, productId);
 
-      res.status(200).json({ message: `Produto:${productId}, deletado com sucesso!` });
+      res.status(204).json({ message: `Produto:${productId}, deletado com sucesso!` });
     } catch (error) {
       next(error);
     }

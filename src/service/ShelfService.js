@@ -4,23 +4,22 @@ import Validation from "../utils/Validation.js";
 import StockService from "../service/StockService.js";
 
 class ShelfService {
-  async createShelf(reqBody, userId) {
-    Validation.validateShelfData(reqBody);
-    Validation.validateTypes(reqBody);
+  async createShelf(validatedBody, userId) {
+    Validation.validateTypes(validatedBody);
 
-    await StockService.getStockById(reqBody.stockId, userId);
+    await StockService.getStockById(validatedBody.stockId, userId);
 
     const shelf = await prisma.shelf.create({
       data: {
-        columns: reqBody.columns,
-        rows: reqBody.rows,
-        destination: reqBody.destination,
-        restriction: reqBody.restriction,
+        columns: validatedBody.columns,
+        rows: validatedBody.rows,
+        destination: validatedBody.destination,
+        restriction: validatedBody.restriction,
         user_id: userId,
         full: false,
         stock: {
           connect: {
-            id: reqBody.stockId,
+            id: validatedBody.stockId,
           },
         },
       },
@@ -29,17 +28,16 @@ class ShelfService {
     return shelf;
   }
 
-  async updateShelf(id, userId, reqBody) {
+  async updateShelf(id, userId, validatedBody) {
     await this.findById(id, userId);
-    Validation.validateShelfData(reqBody);
 
     return await prisma.shelf.update({
       where: { id },
       data: {
-        columns: reqBody.columns,
-        rows: reqBody.rows,
-        destination: reqBody.destination,
-        restriction: reqBody.restriction,
+        columns: validatedBody.columns,
+        rows: validatedBody.rows,
+        destination: validatedBody.destination,
+        restriction: validatedBody.restriction,
       },
     });
   }

@@ -5,42 +5,41 @@ import TemplateService from "./TemplateService.js";
 import ShelfService from "./ShelfService.js";
 
 class ProductService {
-  async registerProduct(userId, reqBody, file) {
-    Validation.validateTypes(reqBody);
+  async registerProduct(userId, validatedBody, validatedFile) {
+  
+    await this.verifyProductAlreadyExist(userId, validatedBody.name, validatedBody.type, validatedBody.ean);
 
-    await this.verifyProductAlreadyExist(userId, reqBody.name, reqBody.type, reqBody.ean);
-
-    await ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
+    await ShelfService.verifyCanPutProduct(validatedBody.shelfId, validatedBody.row, validatedBody.column);
 
     try {
       const newProduct = await prisma.$transaction(async (tx) => {
-        const imageUrl = file ? `/uploads/${file.filename}` : null;
+        const imageUrl = validatedFile ? `/uploads/${validatedFile.filename}` : null;
 
         let template = await tx.productTemplate.findUnique({
-          where: { ean: reqBody.ean },
+          where: { ean: validatedBody.ean },
         });
 
         if (!template) {
-          template = await TemplateService.createProductTemplate(reqBody, imageUrl, tx);
+          template = await TemplateService.createProductTemplate(validatedBody, imageUrl, tx);
         }
 
         const createProduct = await tx.product.create({
           data: {
-            name: template.name,
+            name: validatedBody.name,
             description: template.description,
             type: template.type,
             lote_type: template.loteType,
-            weight: reqBody.weight,
-            lote_amount: reqBody.loteAmount,
-            quantity: reqBody.quantity,
-            validity: reqBody.validity,
-            column: reqBody.column,
-            row: reqBody.row,
+            weight: validatedBody.weight,
+            lote_amount: validatedBody.loteAmount,
+            quantity: validatedBody.quantity,
+            validity: validatedBody.validity,
+            column: validatedBody.column,
+            row: validatedBody.row,
             image: imageUrl,
             user_id: userId,
             shelf: {
               connect: {
-                id: reqBody.shelfId,
+                id: validatedBody.shelfId,
               },
             },
             product_template: {
@@ -65,36 +64,38 @@ class ProductService {
     }
   }
 
-  async updateProduct(id, userId, reqBody) {
-    Validation.validateTypes(reqBody);
+  async updateProduct(id, userId, validatedBody, validatedFile) {
 
     const product = await this.findProductById(id, userId);
 
+    const imageUrl = validatedFile ? `/uploads/${validatedFile.filename}` : null;
+
     if (
-      parseInt(reqBody.shelfId) !== product.shelf_id ||
-      reqBody.row !== product.row ||
-      reqBody.column !== product.column
+      validatedBody.shelfId !== product.shelf_id ||
+      validatedBody.row !== product.row ||
+      validatedBody.column !== product.column
     ) {
-      await ShelfService.verifyCanPutProduct(parseInt(reqBody.shelfId), reqBody.row, reqBody.column);
+      await ShelfService.verifyCanPutProduct(validatedBody.shelfId, validatedBody.row, validatedBody.column);
 
       try {
         return prisma.$transaction(async (tx) => {
           const updatedProduct = await tx.product.update({
             where: { id },
             data: {
-              name: reqBody.name,
-              description: reqBody.description,
-              type: reqBody.type,
-              lote_type: reqBody.loteType,
-              weight: reqBody.weight,
-              lote_amount: reqBody.loteAmount,
-              quantity: reqBody.quantity,
-              validity: reqBody.validity,
-              column: reqBody.column,
-              row: reqBody.row,
+              name: validatedBody.name,
+              description: validatedBody.description,
+              type: validatedBody.type,
+              lote_type: validatedBody.loteType,
+              weight: validatedBody.weight,
+              lote_amount: validatedBody.loteAmount,
+              quantity: validatedBody.quantity,
+              validity: validatedBody.validity,
+              column: validatedBody.column,
+              row: validatedBody.row,
+              image: imageUrl,
               shelf: {
                 connect: {
-                  id: reqBody.shelfId,
+                  id: validatedBody.shelfId,
                 },
               },
             },
@@ -115,23 +116,24 @@ class ProductService {
       return await prisma.product.update({
         where: { id },
         data: {
-          name: reqBody.name,
-          description: reqBody.description,
-          type: reqBody.type,
-          lote_type: reqBody.loteType,
-          weight: reqBody.weight,
-          lote_amount: reqBody.loteAmount,
-          quantity: reqBody.quantity,
-          validity: reqBody.validity,
+          name: validatedBody.name,
+          description: validatedBody.description,
+          type: validatedBody.type,
+          lote_type: validatedBody.loteType,
+          weight: validatedBody.weight,
+          lote_amount: validatedBody.loteAmount,
+          quantity: validatedBody.quantity,
+          validity: validatedBody.validity,
+          image: imageUrl
         },
       });
     }
   }
 
-  async adjustQuantity(userId, productId, reqBody) {
+  async adjustQuantity(userId, productId, validatedBody) {
     const product = await this.findProductById(productId, userId);
 
-    const quantityWithAdjust = product.quantity + parseInt(reqBody.adjustment);
+    const quantityWithAdjust = product.quantity + parseInt(validatedBody.adjustment);
 
     return prisma.product.update({
       where: {
