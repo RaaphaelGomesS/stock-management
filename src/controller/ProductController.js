@@ -48,7 +48,7 @@ class ProductController {
 
   async recentChangedProducts(req, res, next) {
     try {
-      const products = await ProductService.productHistorical(req.userId);
+      const products = await ProductService.productHistorical(req.userId, req.stockId);
 
       res.status(200).json(products);
     } catch (error) {
@@ -60,7 +60,7 @@ class ProductController {
     try {
       const search = req.query.q;
 
-      const products = await ProductService.searchProductByName(req.userId, search);
+      const products = await ProductService.searchProductByName(req.userId, search, req.stockId);
 
       res.status(200).json(products);
     } catch (error) {
@@ -83,7 +83,7 @@ class ProductController {
   async searchProductByEanTemplate(req, res, next) {
     try {
       const ean = parseInt(req.params.ean);
-      const template = await ProductService.searchProductByEanTemplate(req.userId, ean);
+      const template = await ProductService.searchProductByEanTemplate(req.userId, ean, req.stockId);
 
       res.status(200).json(template);
     } catch (error) {

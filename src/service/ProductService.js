@@ -6,7 +6,6 @@ import ShelfService from "./ShelfService.js";
 
 class ProductService {
   async registerProduct(userId, validatedBody, validatedFile) {
-  
     await this.verifyProductAlreadyExist(userId, validatedBody.name, validatedBody.type, validatedBody.ean);
 
     await ShelfService.verifyCanPutProduct(validatedBody.shelfId, validatedBody.row, validatedBody.column);
@@ -65,7 +64,6 @@ class ProductService {
   }
 
   async updateProduct(id, userId, validatedBody, validatedFile) {
-
     const product = await this.findProductById(id, userId);
 
     const imageUrl = validatedFile ? `/uploads/${validatedFile.filename}` : null;
@@ -124,7 +122,7 @@ class ProductService {
           lote_amount: validatedBody.loteAmount,
           quantity: validatedBody.quantity,
           validity: validatedBody.validity,
-          image: imageUrl
+          image: imageUrl,
         },
       });
     }
@@ -175,11 +173,14 @@ class ProductService {
     });
   }
 
-  async productHistorical(userId) {
+  async productHistorical(userId, stockId) {
+    const shelfIds = await this.getShelvesIdInStock(userId, stockId);
+
     return await prisma.product.findMany({
       take: 5,
       where: {
         user_id: userId,
+        shelf_id: { in: shelfIds },
       },
       orderBy: {
         updated_date: "desc",
@@ -187,13 +188,16 @@ class ProductService {
     });
   }
 
-  async searchProductByName(userId, search) {
+  async searchProductByName(userId, search, stockId) {
+    const shelfIds = await this.getShelvesIdInStock(userId, stockId);
+
     return await prisma.product.findMany({
       where: {
         user_id: userId,
         name: {
           contains: search,
         },
+        shelf_id: { in: shelfIds },
       },
     });
   }
@@ -208,11 +212,14 @@ class ProductService {
     });
   }
 
-  async searchProductByEanTemplate(userId, ean) {
+  async searchProductByEanTemplate(userId, ean, stockId) {
+    const shelfIds = await this.getShelvesIdInStock(userId, stockId);
+
     return await prisma.product.findMany({
       where: {
         user_id: userId,
         template_id: ean,
+        shelf_id: { in: shelfIds },
       },
     });
   }
@@ -225,6 +232,14 @@ class ProductService {
     if (product) {
       throw new ProductError("Produto já registrado!", 400);
     }
+  }
+
+  async getShelvesIdInStock(userId, stockId) {
+    const shelvesInStock = await prisma.shelf.findMany({
+      where: { stock_id: stockId, user_id: userId },
+      select: { id: true },
+    });
+    return shelvesInStock.map((shelf) => shelf.id);
   }
 }
 
