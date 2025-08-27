@@ -8,7 +8,7 @@ class UserService {
   async createUser(name, email, password) {
     Validation.validatePasswordAndEmail(email, password);
 
-    await this.verifyUserAlreadyExist(email);
+    await this.verifyUserAlreadyExist(email, null);
 
     const encryptPass = await bcrypt.hash(password, 10);
 
@@ -26,20 +26,29 @@ class UserService {
 
     Validation.validatePasswordAndEmail(email, password);
 
-    await this.verifyUserAlreadyExist(email);
+    await this.verifyUserAlreadyExist(email, id);
 
-    const encryptPass = await bcrypt.hash(password, 10);
+    if (!password) {
+      return await prisma.user.update({
+        where: { id },
+        data: {
+          name: name,
+          email: email,
+          password: password,
+        },
+      });
+    } else {
+      const encryptPass = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.update({
-      where: { id },
-      data: {
-        name: name,
-        email: email,
-        password: encryptPass,
-      },
-    });
-
-    return user;
+      return await prisma.user.update({
+        where: { id },
+        data: {
+          name: name,
+          email: email,
+          password: encryptPass,
+        },
+      });
+    }
   }
 
   async deleteUser(id) {
@@ -68,12 +77,12 @@ class UserService {
     );
   }
 
-  async verifyUserAlreadyExist(email) {
+  async verifyUserAlreadyExist(email, id) {
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (user) {
+    if (user && (id == null || id != user.id)) {
       throw new UserError("Email já cadastrado!", 400);
     }
   }
