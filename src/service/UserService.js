@@ -33,8 +33,7 @@ class UserService {
         where: { id },
         data: {
           name: name,
-          email: email,
-          password: password,
+          email: email
         },
       });
     } else {

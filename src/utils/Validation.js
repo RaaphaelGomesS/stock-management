@@ -9,7 +9,7 @@ class Validation {
       throw new UserError("O email é inválido!", 400);
     }
 
-    if (!password) {
+    if (password) {
       const passwordPattern =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()[\]{}<>#^~+=_.,:;|\\\/-])[A-Za-z\d@$!%*?&()[\]{}<>#^~+=_.,:;|\\\/-]{8,}$/;
 
