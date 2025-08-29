@@ -56,6 +56,11 @@ class ShelfService {
         user_id: userId,
         stock_id: stockId,
       },
+      include: {
+        _count: {
+          select: { product: true },
+        },
+      },
     });
   }
 
