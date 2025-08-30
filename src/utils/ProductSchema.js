@@ -3,12 +3,10 @@ import { lote_type as ProductLoteType, type as ProductType } from "@prisma/clien
 
 export const createProduct = z.object({
   body: z.object({
-    ean: z.coerce
-      .number({
-        required_error: "O ean é obrigatório.",
-        invalid_type_error: "O ean deve ser um número.",
-      })
-      .int("O ean deve ser um inteiro."),
+    ean: z.string({
+      required_error: "O ean é obrigatório.",
+      invalid_type_error: "O ean deve ser um texto.",
+    }),
     name: z.string({
       required_error: "O nome do produto é obrigatório.",
       invalid_type_error: "O nome do produto deve ser um texto.",
@@ -84,9 +82,11 @@ export const createProduct = z.object({
 
 export const updateProduct = z.object({
   body: z.object({
-    name: z.string({
-      invalid_type_error: "O nome do produto deve ser um texto.",
-    }).optional(),
+    name: z
+      .string({
+        invalid_type_error: "O nome do produto deve ser um texto.",
+      })
+      .optional(),
     description: z
       .string({
         invalid_type_error: "A descrição deve ser um texto.",
@@ -132,7 +132,7 @@ export const updateProduct = z.object({
       .int("A quantidade deve ser um inteiro.")
       .nonnegative("A quantidade não pode ser negativa.")
       .optional(),
-    validity:z.coerce
+    validity: z.coerce
       .string({
         invalid_type_error: "A validade deve ser uma string.",
       })

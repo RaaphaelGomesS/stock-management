@@ -8,7 +8,7 @@ datasource db {
 }
 
 model ProductTemplate {
-  ean         Int       @id @default(autoincrement())
+  ean         String    @id
   name        String
   description String?
   type        type      @default(GENERICO)
@@ -24,7 +24,7 @@ model ProductTemplate {
 model product {
   id               Int             @id @default(autoincrement())
   shelf_id         Int
-  template_id      Int
+  template_id      String
   name             String
   description      String?
   type             type            @default(GENERICO)

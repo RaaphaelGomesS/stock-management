@@ -14,7 +14,7 @@ class ProductController {
 
   async findTemplateEan(req, res, next) {
     try {
-      const ean = parseInt(req.params.ean);
+      const ean = req.params.ean;
       const template = await TemplateService.findTemplateByEan(ean);
 
       res.status(200).json(template);
@@ -82,7 +82,7 @@ class ProductController {
 
   async searchProductByEanTemplate(req, res, next) {
     try {
-      const ean = parseInt(req.params.ean);
+      const ean = req.params.ean;
       const template = await ProductService.searchProductByEanTemplate(req.userId, ean, req.stockId);
 
       res.status(200).json(template);
