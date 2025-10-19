@@ -1,5 +1,4 @@
 import prisma from "../../prisma/prismaClient.js";
-import Validation from "../utils/Validation.js";
 import { ProductError } from "../error/Error.js";
 import TemplateService from "./TemplateService.js";
 import ShelfService from "./ShelfService.js";
@@ -132,6 +131,10 @@ class ProductService {
     const product = await this.findProductById(productId, userId);
 
     const quantityWithAdjust = product.quantity + parseInt(validatedBody.adjustment);
+
+    if (quantityWithAdjust < 0) {
+      throw new ProductError("Valor inválido para alterar a quantidade do produto em estoque.", 404);
+    }
 
     return prisma.product.update({
       where: {
